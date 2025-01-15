@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { GameCard } from "@/components/GameCard";
-import { Coins, Trophy, Gamepad, ArrowRight, Sparkles, Flame, Dice, Cards, Joystick } from "lucide-react";
+import { Coins, Trophy, Gamepad, ArrowRight, Sparkles, Flame, Dice1, PlayCard, Joystick } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
@@ -69,7 +69,7 @@ const gameCategories = {
   },
   table: {
     title: "Table Games",
-    icon: <Cards className="h-6 w-6 text-accent" />,
+    icon: <PlayCard className="h-6 w-6 text-accent" />,
     games: [
       {
         title: "Classic Blackjack",
@@ -91,7 +91,7 @@ const gameCategories = {
   },
   dice: {
     title: "Dice Games",
-    icon: <Dice className="h-6 w-6 text-secondary" />,
+    icon: <Dice1 className="h-6 w-6 text-secondary" />,
     games: [
       {
         title: "Craps Master",
