@@ -22,6 +22,16 @@ export const Navbar = () => {
                 {user.sweepcoins}
               </span>
               <Button 
+                variant="secondary"
+                size="lg"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 animate-pulse"
+              >
+                <Link to="/purchase" className="flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  Buy Coins
+                </Link>
+              </Button>
+              <Button 
                 variant="ghost" 
                 className="text-foreground hover:text-accent hover:bg-accent/10"
                 onClick={signOut}

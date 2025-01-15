@@ -1,12 +1,9 @@
 import { Coins } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 export const UserWelcome = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   return (
     <section className="container pt-32 pb-12">
@@ -30,12 +27,6 @@ export const UserWelcome = () => {
               </div>
             </CardContent>
           </Card>
-          <Button 
-            size="lg"
-            onClick={() => navigate("/purchase")}
-          >
-            Buy Coins
-          </Button>
         </div>
       </div>
     </section>
