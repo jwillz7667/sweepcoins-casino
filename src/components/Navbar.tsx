@@ -24,7 +24,7 @@ export const Navbar = () => {
               <Button 
                 variant="secondary"
                 size="lg"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 animate-pulse"
+                className="bg-[#39FF14] hover:bg-[#39FF14]/90 text-primary font-semibold shadow-lg shadow-[#39FF14]/20 animate-pulse transition-all duration-300"
               >
                 <Link to="/purchase" className="flex items-center gap-2">
                   <Coins className="h-4 w-4" />
