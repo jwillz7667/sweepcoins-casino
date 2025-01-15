@@ -77,7 +77,7 @@ export default {
         },
         "slow-pulse": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.7" },
+          "50%": { opacity: "0.85" },
         },
       },
       animation: {
@@ -85,7 +85,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 3s ease-in-out infinite",
         glow: "glow 2s ease-in-out infinite",
-        "slow-pulse": "slow-pulse 4s ease-in-out infinite",
+        "slow-pulse": "slow-pulse 8s ease-in-out infinite",
       },
     },
   },
