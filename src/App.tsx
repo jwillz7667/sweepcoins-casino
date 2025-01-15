@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-import { Index } from "@/pages/Index";
+import Index from "@/pages/Index";
 import { Auth } from "@/pages/Auth";
 import { Dashboard } from "@/pages/Dashboard";
 import { Purchase } from "@/pages/Purchase";
