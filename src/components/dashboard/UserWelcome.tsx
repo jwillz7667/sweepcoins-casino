@@ -1,9 +1,12 @@
 import { Coins } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const UserWelcome = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <section className="container pt-32 pb-12">
@@ -13,19 +16,27 @@ export const UserWelcome = () => {
             Welcome back, {user?.username}!
           </h1>
         </div>
-        <Card className="bg-secondary/10 border-secondary/20">
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center gap-3">
-              <Coins className="h-8 w-8 text-accent animate-float animate-glow" />
-              <div>
-                <p className="text-sm text-foreground/80">Balance</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {user?.sweepcoins} SC
-                </p>
+        <div className="flex items-center gap-4">
+          <Card className="bg-secondary/10 border-secondary/20">
+            <CardContent className="flex items-center p-6">
+              <div className="flex items-center gap-3">
+                <Coins className="h-8 w-8 text-accent animate-float animate-glow" />
+                <div>
+                  <p className="text-sm text-foreground/80">Balance</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {user?.sweepcoins} SC
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          <Button 
+            size="lg"
+            onClick={() => navigate("/purchase")}
+          >
+            Buy Coins
+          </Button>
+        </div>
       </div>
     </section>
   );
