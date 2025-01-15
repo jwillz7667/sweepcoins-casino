@@ -8,27 +8,27 @@ export const Navbar = () => {
 
   return (
     <nav className="fixed top-0 w-full bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/60 z-50 border-b border-secondary/20">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
         <Link to="/" className="flex items-center space-x-2">
           <Coins className="h-6 w-6 text-accent animate-float animate-glow" />
           <span className="text-xl font-bold text-foreground">SweepCoins Casino</span>
         </Link>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <>
-              <span className="text-foreground">
+              <span className="text-foreground hidden sm:inline-flex items-center">
                 <Coins className="inline h-4 w-4 text-accent mr-1" />
                 {user.sweepcoins}
               </span>
               <Button 
                 variant="secondary"
-                size="lg"
-                className="bg-[#39FF14] hover:bg-[#39FF14]/90 text-primary font-semibold shadow-lg shadow-[#39FF14]/20 animate-slow-pulse transition-all duration-300"
+                size="sm"
+                className="bg-[#39FF14] hover:bg-[#39FF14]/90 text-primary font-semibold shadow-lg shadow-[#39FF14]/20 animate-slow-pulse transition-all duration-300 sm:size-lg"
               >
-                <Link to="/purchase" className="flex items-center gap-2">
+                <Link to="/purchase" className="flex items-center gap-1 sm:gap-2">
                   <Coins className="h-4 w-4" />
-                  Buy Coins
+                  <span className="text-sm sm:text-base">Buy</span>
                 </Link>
               </Button>
               <Button 
