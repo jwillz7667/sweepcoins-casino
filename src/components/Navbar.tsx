@@ -17,10 +17,12 @@ export const Navbar = () => {
         <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <>
-              <span className="text-foreground hidden sm:inline-flex items-center">
-                <Coins className="inline h-4 w-4 text-accent mr-1" />
-                {user.sweepcoins}
-              </span>
+              <div className="flex items-center justify-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
+                <Coins className="inline h-4 w-4 text-accent mr-1.5" />
+                <span className="text-accent font-medium">
+                  {user.sweepcoins.toLocaleString()}
+                </span>
+              </div>
               <Button 
                 variant="secondary"
                 size="sm"
