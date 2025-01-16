@@ -39,7 +39,7 @@ export const GameCard = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Card className={cn("group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer", className)}>
+        <Card className={cn("group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col", className)}>
           <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-60" />
           {image ? (
             <div className="h-48 overflow-hidden">
@@ -50,14 +50,14 @@ export const GameCard = ({
               <Gamepad2 className="h-20 w-20 text-secondary/20" />
             </div>
           )}
-          <CardHeader className="relative">
+          <CardHeader className="relative flex-grow">
             <CardTitle className="flex items-center gap-2 text-xl">
               {title}
               {locked && <Lock className="h-4 w-4 text-accent" />}
             </CardTitle>
             <CardDescription>{description}</CardDescription>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent className="relative mt-auto">
             <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
               {locked ? "Coming Soon" : "Play Now"}
             </Button>
