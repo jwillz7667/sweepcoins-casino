@@ -13,7 +13,7 @@ export const HeroSection = () => {
           Experience the thrill of casino games with our virtual currency. Play, win, and redeem amazing prizes!
         </p>
         <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
-          <Link to="/register" className="flex items-center space-x-2">
+          <Link to="/auth" className="flex items-center space-x-2">
             <span>Start Playing Now</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
