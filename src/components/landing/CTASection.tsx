@@ -14,7 +14,7 @@ export const CTASection = () => {
           Join thousands of players and start your winning streak today. Get 1000 SweepCoins as a welcome bonus!
         </p>
         <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
-          <Link to="/register" className="flex items-center space-x-2">
+          <Link to="/auth" className="flex items-center space-x-2">
             <span>Claim Your Bonus</span>
             <ArrowRight className="h-4 w-4" />
           </Link>

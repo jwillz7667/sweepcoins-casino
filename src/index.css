@@ -38,7 +38,15 @@
 
 @layer utilities {
   .glass-morphism {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .glass-morphism:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px 0 rgba(31, 38, 135, 0.45);
   }
   
   .neo-blur {
