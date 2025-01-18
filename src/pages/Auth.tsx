@@ -24,7 +24,7 @@ export const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary/90 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md glass-morphism">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-6">
             <Coins className="h-12 w-12 text-accent animate-float animate-glow" />
@@ -49,6 +49,7 @@ export const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white/5"
               />
             </div>
             {!isLogin && (
@@ -61,6 +62,7 @@ export const Auth = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+                  className="bg-white/5"
                 />
               </div>
             )}
@@ -73,6 +75,7 @@ export const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-white/5"
               />
             </div>
           </CardContent>
@@ -83,7 +86,7 @@ export const Auth = () => {
             <Button
               type="button"
               variant="ghost"
-              className="w-full"
+              className="w-full hover:bg-white/5"
               onClick={() => setIsLogin(!isLogin)}
             >
               {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
