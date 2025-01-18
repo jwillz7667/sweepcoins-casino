@@ -49,7 +49,7 @@ export const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white/5"
+                className="auth-input"
               />
             </div>
             {!isLogin && (
@@ -62,7 +62,7 @@ export const Auth = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="bg-white/5"
+                  className="auth-input"
                 />
               </div>
             )}
@@ -75,7 +75,7 @@ export const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-white/5"
+                className="auth-input"
               />
             </div>
           </CardContent>

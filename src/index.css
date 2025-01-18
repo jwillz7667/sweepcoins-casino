@@ -16,13 +16,13 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 230 30% 13%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 316 95% 65%;
+    --accent: 32 95% 44%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 230 30% 13%;
-    --input: 230 30% 13%;
-    --ring: 271 95% 65%;
+    --input: 0 0% 100%;
+    --ring: 32 95% 44%;
     --radius: 0.75rem;
   }
 }
@@ -64,5 +64,11 @@
 @layer components {
   .card {
     @apply glass-morphism rounded-lg p-6 transition-all duration-200;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 215, 0, 0.05));
+    border: 1px solid rgba(255, 215, 0, 0.18);
+  }
+
+  .auth-input {
+    @apply bg-white text-gray-900 border-gray-200;
   }
 }
