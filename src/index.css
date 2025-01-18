@@ -12,17 +12,17 @@
     --popover-foreground: 210 40% 98%;
     --primary: 230 30% 11%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 271 95% 65%;
+    --secondary: 265 84% 66%;
     --secondary-foreground: 210 40% 98%;
     --muted: 230 30% 13%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 255 80% 75%;
+    --accent: 302 84% 60%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 230 30% 13%;
     --input: 0 0% 100%;
-    --ring: 255 80% 75%;
+    --ring: 302 84% 60%;
     --radius: 0.75rem;
   }
 }
@@ -41,17 +41,17 @@
 
 @layer utilities {
   .glass-morphism {
-    @apply bg-white/10 backdrop-blur-md border border-accent/20 shadow-lg;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(155, 135, 245, 0.05));
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    box-shadow: 0 8px 32px 0 rgba(217, 70, 239, 0.25);
     transform: translateY(-2px);
     transition: all 0.2s ease-in-out;
   }
   
   .glass-morphism:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 36px 0 rgba(155, 135, 245, 0.25);
-    @apply bg-white/15 border-accent/30;
+    box-shadow: 0 12px 36px 0 rgba(217, 70, 239, 0.35);
+    @apply bg-white/15 border-white/30;
   }
   
   .neo-blur {
@@ -68,11 +68,15 @@
 @layer components {
   .card {
     @apply glass-morphism rounded-lg p-6 transition-all duration-200;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(155, 135, 245, 0.05));
-    border: 1px solid rgba(155, 135, 245, 0.18);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.18);
   }
 
   .auth-input {
     @apply bg-white text-gray-900 border-gray-200;
+  }
+
+  .btn {
+    @apply glass-morphism inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
 }
