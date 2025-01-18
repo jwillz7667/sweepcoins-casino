@@ -13,7 +13,6 @@ const packages = [
 
 export const PurchaseOptions = () => {
   const handlePurchase = (packageOption: typeof packages[0]) => {
-    // TODO: Implement actual purchase logic
     toast.info("Purchase functionality coming soon!", {
       description: `Selected package: ${packageOption.coins} coins for $${packageOption.price}`,
     });
@@ -24,11 +23,11 @@ export const PurchaseOptions = () => {
       {packages.map((pkg) => (
         <Card 
           key={pkg.id} 
-          className={`relative ${pkg.popular ? 'border-accent shadow-lg' : ''}`}
+          className={`glass-morphism relative ${pkg.popular ? 'border-accent shadow-lg ring-2 ring-accent/50' : ''}`}
         >
           {pkg.popular && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium shadow-lg">
                 Most Popular
               </span>
             </div>
@@ -40,7 +39,7 @@ export const PurchaseOptions = () => {
           </CardHeader>
           <CardContent className="text-center">
             <div className="flex justify-center mb-4">
-              <Coins className="h-12 w-12 text-accent" />
+              <Coins className="h-12 w-12 text-accent animate-float" />
             </div>
             <p className="text-3xl font-bold mb-2">
               ${pkg.price}
@@ -51,7 +50,7 @@ export const PurchaseOptions = () => {
           </CardContent>
           <CardFooter>
             <Button 
-              className="w-full" 
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
               size="lg"
               onClick={() => handlePurchase(pkg)}
             >

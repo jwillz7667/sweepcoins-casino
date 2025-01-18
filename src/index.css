@@ -41,12 +41,13 @@
     @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     transform: translateY(-2px);
-    transition: transform 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
   }
   
   .glass-morphism:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 36px 0 rgba(31, 38, 135, 0.45);
+    @apply bg-white/15;
   }
   
   .neo-blur {
@@ -57,5 +58,11 @@
     content: "";
     @apply absolute inset-0 -z-10 blur-xl opacity-50;
     background: inherit;
+  }
+}
+
+@layer components {
+  .card {
+    @apply glass-morphism rounded-lg p-6 transition-all duration-200;
   }
 }
