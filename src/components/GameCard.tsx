@@ -39,23 +39,31 @@ export const GameCard = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Card className={cn("group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col glass-morphism", className)}>
-          <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-60" />
+        <Card className={cn(
+          "group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col glass-morphism bg-white/10",
+          "hover:bg-white/15",
+          className
+        )}>
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent opacity-80" />
           {image ? (
             <div className="h-48 overflow-hidden rounded-t-lg">
-              <img src={image} alt={title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+              <img 
+                src={image} 
+                alt={title} 
+                className="h-full w-full object-cover transition-transform group-hover:scale-105" 
+              />
             </div>
           ) : (
-            <div className="flex h-48 items-center justify-center bg-secondary/10 rounded-t-lg">
-              <Gamepad2 className="h-20 w-20 text-secondary/20" />
+            <div className="flex h-48 items-center justify-center bg-secondary/20 rounded-t-lg">
+              <Gamepad2 className="h-20 w-20 text-secondary opacity-50" />
             </div>
           )}
-          <CardHeader className="relative flex-grow">
-            <CardTitle className="flex items-center gap-2 text-xl">
+          <CardHeader className="relative flex-grow bg-gradient-to-b from-transparent to-primary/40">
+            <CardTitle className="flex items-center gap-2 text-xl text-white">
               {title}
-              {locked && <Lock className="h-4 w-4 text-accent" />}
+              {locked && <Lock className="h-4 w-4 text-accent animate-pulse" />}
             </CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardDescription className="text-gray-200">{description}</CardDescription>
           </CardHeader>
           <CardContent className="relative mt-auto">
             <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
@@ -65,9 +73,9 @@ export const GameCard = ({
         </Card>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] glass-morphism">
+      <DialogContent className="sm:max-w-[600px] glass-morphism bg-primary/95">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white">{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <div className="aspect-video overflow-hidden rounded-lg">
@@ -80,22 +88,22 @@ export const GameCard = ({
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Volatility</div>
+              <div className="text-sm text-gray-400">Volatility</div>
               <div className="flex items-center gap-2">
                 <Gauge className={cn("h-5 w-5", getVolatilityColor(volatility))} />
-                <span className="font-semibold capitalize">{volatility}</span>
+                <span className="font-semibold capitalize text-white">{volatility}</span>
               </div>
             </div>
             
             <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Return to Player</div>
-              <div className="font-semibold">{rtp}%</div>
+              <div className="text-sm text-gray-400">Return to Player</div>
+              <div className="font-semibold text-white">{rtp}%</div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm text-muted-foreground">Description</div>
-            <p>{description}</p>
+            <div className="text-sm text-gray-400">Description</div>
+            <p className="text-gray-200">{description}</p>
           </div>
 
           <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90">

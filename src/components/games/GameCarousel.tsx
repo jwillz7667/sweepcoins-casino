@@ -32,7 +32,7 @@ export const GameCarousel = ({ title, icon, games }: GameCarouselProps) => {
             dragFree: isMobile,
             containScroll: "trimSnaps"
           }}
-          className="w-full glass-morphism p-6 rounded-lg"
+          className="w-full glass-morphism p-6 rounded-lg bg-primary/40"
         >
           <CarouselContent className="-ml-2 md:-ml-4">
             {games.map((game, index) => (
@@ -44,8 +44,8 @@ export const GameCarousel = ({ title, icon, games }: GameCarouselProps) => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12 glass-morphism hover:bg-white/20" />
-          <CarouselNext className="hidden md:flex -right-12 glass-morphism hover:bg-white/20" />
+          <CarouselPrevious className="hidden md:flex -left-12 glass-morphism hover:bg-white/20 bg-primary/60" />
+          <CarouselNext className="hidden md:flex -right-12 glass-morphism hover:bg-white/20 bg-primary/60" />
         </Carousel>
       </div>
     </div>
