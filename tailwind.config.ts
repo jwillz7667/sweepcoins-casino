@@ -29,13 +29,13 @@ export default {
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#8B5CF6",
+          DEFAULT: "#6E59A5",
           foreground: "#ffffff",
         },
         accent: {
-          DEFAULT: "#FFB800",
+          DEFAULT: "#9b87f5",
           foreground: "#ffffff",
-          muted: "#FEF7CD",
+          muted: "#E5DEFF",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
