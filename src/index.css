@@ -51,7 +51,7 @@
   .glass-morphism:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 36px 0 rgba(217, 70, 239, 0.35);
-    @apply bg-white/15 border-white/30;
+    @apply bg-white/5;
   }
   
   .neo-blur {
