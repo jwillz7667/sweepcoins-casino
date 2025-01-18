@@ -39,14 +39,14 @@ export const GameCard = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Card className={cn("group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col", className)}>
+        <Card className={cn("group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col glass-morphism", className)}>
           <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-60" />
           {image ? (
-            <div className="h-48 overflow-hidden">
+            <div className="h-48 overflow-hidden rounded-t-lg">
               <img src={image} alt={title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
             </div>
           ) : (
-            <div className="flex h-48 items-center justify-center bg-secondary/10">
+            <div className="flex h-48 items-center justify-center bg-secondary/10 rounded-t-lg">
               <Gamepad2 className="h-20 w-20 text-secondary/20" />
             </div>
           )}
@@ -65,7 +65,7 @@ export const GameCard = ({
         </Card>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] glass-morphism">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
         </DialogHeader>
