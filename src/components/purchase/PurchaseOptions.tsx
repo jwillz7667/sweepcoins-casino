@@ -79,20 +79,13 @@ export const PurchaseOptions = () => {
             </span>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between flex-1 pl-8">
             {pkg.tag && (
               <span className="absolute -top-3 left-4 bg-[#00FF47] text-black px-3 py-0.5 rounded-full text-sm font-medium">
                 {pkg.tag}
               </span>
             )}
             
-            <Button 
-              className="bg-[#FF0066] hover:bg-[#FF0066]/90 text-white font-semibold rounded-full px-8"
-              onClick={() => handlePurchase(pkg)}
-            >
-              ${pkg.price}
-            </Button>
-
             <div className="flex space-x-2">
               <div className="flex flex-col items-center bg-[#222222] p-2 rounded-lg">
                 <GamepadIcon className="h-5 w-5 text-yellow-400 mb-1" />
@@ -110,6 +103,13 @@ export const PurchaseOptions = () => {
                 💵 FREE SC {pkg.freeSC}
               </div>
             )}
+
+            <Button 
+              className="bg-[#FF0066] hover:bg-[#FF0066]/90 text-white font-semibold rounded-full px-8 min-w-[120px]"
+              onClick={() => handlePurchase(pkg)}
+            >
+              ${pkg.price}
+            </Button>
           </div>
         </Card>
       ))}
