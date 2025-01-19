@@ -1,6 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Gamepad2, Lock } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface GameThumbnailProps {
@@ -8,6 +6,7 @@ interface GameThumbnailProps {
   description: string;
   image?: string;
   locked?: boolean;
+  isNew?: boolean;
   className?: string;
 }
 
@@ -16,40 +15,35 @@ export const GameThumbnail = ({
   description,
   image,
   locked = false,
+  isNew = false,
   className
 }: GameThumbnailProps) => {
   return (
-    <Card className={cn(
-      "group relative overflow-hidden transition-all hover:shadow-xl cursor-pointer flex flex-col glass-morphism bg-white/10",
-      "hover:bg-white/15",
+    <div className={cn(
+      "group relative overflow-hidden rounded-lg cursor-pointer transition-all",
       className
     )}>
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent opacity-80" />
-      {image ? (
-        <div className="h-48 overflow-hidden rounded-t-lg">
+      {isNew && (
+        <div className="absolute top-2 left-2 z-10 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+          NEW
+        </div>
+      )}
+      <div className="relative aspect-[3/4] overflow-hidden">
+        {image ? (
           <img 
             src={image} 
             alt={title} 
             className="h-full w-full object-cover transition-transform group-hover:scale-105" 
           />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-purple-500/20 to-accent/20" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
+          <p className="text-sm text-white/70">{description}</p>
         </div>
-      ) : (
-        <div className="flex h-48 items-center justify-center bg-secondary/20 rounded-t-lg">
-          <Gamepad2 className="h-20 w-20 text-secondary opacity-50" />
-        </div>
-      )}
-      <CardHeader className="relative flex-grow bg-gradient-to-b from-transparent to-primary/40">
-        <CardTitle className="flex items-center gap-2 text-xl text-white">
-          {title}
-          {locked && <Lock className="h-4 w-4 text-accent animate-pulse" />}
-        </CardTitle>
-        <CardDescription className="text-gray-200">{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="relative mt-auto">
-        <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
-          {locked ? "Coming Soon" : "Play Now"}
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

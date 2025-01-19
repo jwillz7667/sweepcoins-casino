@@ -4,23 +4,23 @@
  
 @layer base {
   :root {
-    --background: 230 30% 11%;
+    --background: 0 0% 0%;
     --foreground: 210 40% 98%;
-    --card: 230 30% 13%;
+    --card: 0 0% 4%;
     --card-foreground: 210 40% 98%;
-    --popover: 230 30% 13%;
+    --popover: 0 0% 4%;
     --popover-foreground: 210 40% 98%;
-    --primary: 230 30% 11%;
+    --primary: 0 0% 0%;
     --primary-foreground: 210 40% 98%;
     --secondary: 265 84% 66%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 230 30% 13%;
+    --muted: 0 0% 4%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 302 84% 60%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 230 30% 13%;
+    --border: 0 0% 4%;
     --input: 0 0% 100%;
     --ring: 302 84% 60%;
     --radius: 0.75rem;
@@ -41,16 +41,16 @@
 
 @layer utilities {
   .glass-morphism {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    box-shadow: 0 8px 32px 0 rgba(217, 70, 239, 0.25);
+    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    box-shadow: 0 8px 32px 0 rgba(217, 70, 239, 0.15);
     transform: translateY(-2px);
     transition: all 0.2s ease-in-out;
   }
   
   .glass-morphism:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 36px 0 rgba(217, 70, 239, 0.35);
+    box-shadow: 0 12px 36px 0 rgba(217, 70, 239, 0.25);
     @apply bg-white/5;
   }
   
@@ -68,8 +68,8 @@
 @layer components {
   .card {
     @apply glass-morphism rounded-lg p-6 transition-all duration-200;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .auth-input {
