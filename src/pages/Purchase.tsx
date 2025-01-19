@@ -1,18 +1,25 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { PurchaseOptions } from "@/components/purchase/PurchaseOptions";
+import { Coins } from "lucide-react";
 
 export const Purchase = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary/90">
+    <div className="min-h-screen bg-black">
       <Navbar />
-      <main className="container py-32">
+      <main className="container py-8 md:py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-foreground mb-8">
-            Purchase SweepCoins
-          </h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+              Purchase Game Coins
+            </h1>
+            <div className="flex items-center space-x-2 text-yellow-400">
+              <Coins className="h-6 w-6" />
+              <span className="font-medium">Current Balance: 0 GC</span>
+            </div>
+          </div>
           <PurchaseOptions />
         </div>
       </main>
