@@ -20,11 +20,11 @@ export const GameThumbnail = ({
 }: GameThumbnailProps) => {
   return (
     <div className={cn(
-      "group relative overflow-hidden rounded-lg cursor-pointer transition-all",
+      "group relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 hover:scale-105",
       className
     )}>
       {isNew && (
-        <div className="absolute top-2 left-2 z-10 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+        <div className="absolute top-2 left-2 z-10 bg-[#32CD32] text-black text-xs font-bold px-2 py-1 rounded">
           NEW
         </div>
       )}
@@ -33,7 +33,7 @@ export const GameThumbnail = ({
           <img 
             src={image} 
             alt={title} 
-            className="h-full w-full object-cover transition-transform group-hover:scale-105" 
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-purple-500/20 to-accent/20" />
