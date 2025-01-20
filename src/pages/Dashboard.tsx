@@ -1,31 +1,30 @@
 import { Navbar } from "@/components/Navbar";
-import { UserWelcome } from "@/components/dashboard/UserWelcome";
 import { GameCategories } from "@/components/games/GameCategories";
-import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
+import { PromotionalBanner } from "@/components/dashboard/PromotionalBanner";
+import { GameNavigation } from "@/components/dashboard/GameNavigation";
 
 export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
-      <main className="container px-4 py-4 space-y-6">
-        <div className="flex items-center justify-between py-2">
-          <div className="flex gap-4">
-            <button className="px-6 py-2 rounded-full bg-accent/10 text-white border border-accent/20">
-              Lobby
-            </button>
-            <button className="px-6 py-2 rounded-full bg-white/5 text-white/80 hover:bg-white/10">
-              For You
-            </button>
-            <button className="px-6 py-2 rounded-full bg-white/5 text-white/80 hover:bg-white/10">
-              Popular
-            </button>
-            <button className="px-6 py-2 rounded-full bg-white/5 text-white/80 hover:bg-white/10">
-              New & Exclusive
-            </button>
+      <div className="relative">
+        {/* Promotional Banners */}
+        <div className="relative z-0">
+          <PromotionalBanner />
+        </div>
+
+        {/* Sticky Navigation */}
+        <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+          <Navbar />
+          <div className="border-t border-white/5">
+            <GameNavigation />
           </div>
         </div>
-        <GameCategories />
-      </main>
+
+        {/* Main Content */}
+        <main className="container px-4 py-6 space-y-8">
+          <GameCategories />
+        </main>
+      </div>
     </div>
   );
 };
