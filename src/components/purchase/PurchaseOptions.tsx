@@ -105,7 +105,7 @@ export const PurchaseOptions = () => {
             )}
 
             <Button 
-              className="bg-[#FF0066] hover:bg-[#FF0066]/90 text-white font-semibold rounded-full px-8 min-w-[120px]"
+              className="bg-[#FF0000] hover:bg-[#FF0000]/90 text-white font-semibold rounded-full px-8 min-w-[120px]"
               onClick={() => handlePurchase(pkg)}
             >
               ${pkg.price}
