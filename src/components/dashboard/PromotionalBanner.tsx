@@ -12,7 +12,7 @@ export const PromotionalBanner = () => {
     },
     {
       title: "LOYALTY CLUB",
-      heading: "MCLUCK LOYALTY CLUB",
+      heading: "SWEEPCOINS LOYALTY CLUB",
       subheading: "Earn rewards as you play",
       image: "/placeholder.svg",
       bgColor: "from-amber-900 to-orange-900"

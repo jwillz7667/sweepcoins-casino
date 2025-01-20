@@ -5,7 +5,7 @@ import { GameNavigation } from "@/components/dashboard/GameNavigation";
 
 export const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-primary">
       <div className="relative">
         {/* Promotional Banners */}
         <div className="relative z-0">
@@ -13,7 +13,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Sticky Navigation */}
-        <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+        <div className="sticky top-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-white/10">
           <Navbar />
           <div className="border-t border-white/5">
             <GameNavigation />
