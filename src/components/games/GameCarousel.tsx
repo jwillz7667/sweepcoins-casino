@@ -1,6 +1,7 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { GameCard } from "@/components/GameCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LucideIcon } from "lucide-react";
 
 interface Game {
   title: string;
@@ -12,11 +13,11 @@ interface Game {
 
 interface GameCarouselProps {
   title: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   games: Game[];
 }
 
-export const GameCarousel = ({ title, icon, games }: GameCarouselProps) => {
+export const GameCarousel = ({ title, icon: Icon, games }: GameCarouselProps) => {
   const isMobile = useIsMobile();
 
   return (

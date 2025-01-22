@@ -11,7 +11,7 @@ export const GameCategorySection = ({ categoryId, category }: GameCategorySectio
   return (
     <div id={categoryId} className="space-y-4 scroll-mt-32">
       <GameCategoryHeader title={category.title} Icon={category.icon} />
-      <GameCarousel {...category} />
+      <GameCarousel title={category.title} icon={category.icon} games={category.games} />
     </div>
   );
 };
