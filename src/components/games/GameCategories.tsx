@@ -1,5 +1,5 @@
 import { GameCarousel } from "./GameCarousel";
-import { Flame, Joystick, Layout, Dice1, Crown, Star, Trophy, Zap, Heart, Target } from "lucide-react";
+import { Flame, Joystick, Layout, Crown, Star, Trophy, Heart } from "lucide-react";
 
 export const gameCategories = {
   featured: {
@@ -34,7 +34,7 @@ export const gameCategories = {
   },
   holdAndWin: {
     title: "Hold & Win",
-    icon: <Flame className="h-6 w-6 text-accent" />,
+    icon: <Joystick className="h-6 w-6 text-accent" />,
     games: [
       {
         title: "Tundra Wolf",
@@ -101,42 +101,9 @@ export const gameCategories = {
       }
     ]
   },
-  newReleases: {
-    title: "New Releases",
-    icon: <Zap className="h-6 w-6 text-accent" />,
-    games: [
-      {
-        title: "Dragon's Fortune",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "medium",
-        rtp: 96.5,
-        gameplay: "/placeholder.svg",
-        isNew: true
-      },
-      {
-        title: "Mystic Wilds",
-        description: "PRAGMATIC PLAY",
-        image: "/placeholder.svg",
-        volatility: "high",
-        rtp: 97.1,
-        gameplay: "/placeholder.svg",
-        isNew: true
-      },
-      {
-        title: "Fortune Wheel",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "low",
-        rtp: 95.9,
-        gameplay: "/placeholder.svg",
-        isNew: true
-      }
-    ]
-  },
   popular: {
     title: "Popular Now",
-    icon: <Trophy className="h-6 w-6 text-accent" />,
+    icon: <Flame className="h-6 w-6 text-accent" />,
     games: [
       {
         title: "Lucky Fortune",
@@ -164,38 +131,8 @@ export const gameCategories = {
       }
     ]
   },
-  exclusive: {
-    title: "Exclusive Games",
-    icon: <Target className="h-6 w-6 text-accent" />,
-    games: [
-      {
-        title: "Golden Dragon",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "high",
-        rtp: 98.1,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "Royal Gems",
-        description: "PRAGMATIC PLAY",
-        image: "/placeholder.svg",
-        volatility: "medium",
-        rtp: 96.9,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "Diamond Rush",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "low",
-        rtp: 95.7,
-        gameplay: "/placeholder.svg"
-      }
-    ]
-  },
   favorites: {
-    title: "Player Favorites",
+    title: "For You",
     icon: <Heart className="h-6 w-6 text-accent" />,
     games: [
       {
@@ -225,7 +162,7 @@ export const gameCategories = {
     ]
   },
   megaways: {
-    title: "Megaways™",
+    title: "Classic Slots",
     icon: <Layout className="h-6 w-6 text-accent" />,
     games: [
       {
@@ -253,66 +190,6 @@ export const gameCategories = {
         gameplay: "/placeholder.svg"
       }
     ]
-  },
-  table: {
-    title: "Table Games",
-    icon: <Dice1 className="h-6 w-6 text-accent" />,
-    games: [
-      {
-        title: "Blackjack Pro",
-        description: "EVOLUTION",
-        image: "/placeholder.svg",
-        volatility: "low",
-        rtp: 99.5,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "European Roulette",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "medium",
-        rtp: 97.3,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "Baccarat",
-        description: "EVOLUTION",
-        image: "/placeholder.svg",
-        volatility: "low",
-        rtp: 98.9,
-        gameplay: "/placeholder.svg"
-      }
-    ]
-  },
-  arcade: {
-    title: "Arcade Games",
-    icon: <Joystick className="h-6 w-6 text-accent" />,
-    games: [
-      {
-        title: "Space Invaders",
-        description: "PLAYTECH",
-        image: "/placeholder.svg",
-        volatility: "medium",
-        rtp: 96.1,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "Plinko",
-        description: "PRAGMATIC PLAY",
-        image: "/placeholder.svg",
-        volatility: "high",
-        rtp: 97.0,
-        gameplay: "/placeholder.svg"
-      },
-      {
-        title: "Coin Flip",
-        description: "EVOLUTION",
-        image: "/placeholder.svg",
-        volatility: "medium",
-        rtp: 96.4,
-        gameplay: "/placeholder.svg"
-      }
-    ]
   }
 };
 
@@ -320,7 +197,7 @@ export const GameCategories = () => {
   return (
     <section className="space-y-8">
       {Object.entries(gameCategories).map(([key, category]) => (
-        <div key={key} className="space-y-4">
+        <div key={key} id={key} className="space-y-4 scroll-mt-32">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {category.icon}
