@@ -5,7 +5,7 @@ import { CTASection } from "@/components/landing/CTASection";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary/90">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90">
       <Navbar />
       <HeroSection />
       <FeaturesSection />

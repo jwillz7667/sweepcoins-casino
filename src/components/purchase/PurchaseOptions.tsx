@@ -1,65 +1,91 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Coins, MessageCircle, GamepadIcon } from "lucide-react";
+import { Coins, MessageCircle, GamepadIcon, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { useState } from "react";
 
 const packages = [
   { 
     id: 1, 
     coins: 8000, 
-    price: 1.99, 
+    price: 0.001, // ETH price
+    usdPrice: 1.99,
     freeSC: 0,
     tag: null 
   },
   { 
     id: 2, 
     coins: 20000, 
-    price: 4.99, 
+    price: 0.0025, // ETH price
+    usdPrice: 4.99,
     freeSC: 5,
     tag: null 
   },
   { 
     id: 3, 
     coins: 40000, 
-    price: 9.99, 
+    price: 0.005, // ETH price
+    usdPrice: 9.99,
     freeSC: 10,
     tag: null 
   },
   { 
     id: 4, 
     coins: 80000, 
-    price: 19.99, 
+    price: 0.01, // ETH price
+    usdPrice: 19.99,
     freeSC: 20,
     tag: null 
   },
   { 
     id: 5, 
     coins: 160000, 
-    price: 34.99, 
+    price: 0.0175, // ETH price
+    usdPrice: 34.99,
     freeSC: 40,
     tag: "FLASH OFFER" 
   },
   { 
     id: 6, 
     coins: 180000, 
-    price: 38.99, 
+    price: 0.0195, // ETH price
+    usdPrice: 38.99,
     freeSC: 45,
     tag: "DAILY OFFER" 
   },
   { 
     id: 7, 
     coins: 200000, 
-    price: 49.99, 
+    price: 0.025, // ETH price
+    usdPrice: 49.99,
     freeSC: 50,
     tag: null 
   },
 ];
 
 export const PurchaseOptions = () => {
-  const handlePurchase = (packageOption: typeof packages[0]) => {
-    toast.info("Purchase functionality coming soon!", {
-      description: `Selected package: ${packageOption.coins.toLocaleString()} coins for $${packageOption.price}`,
-    });
+  const { account, connectWallet, sendTransaction } = useWeb3();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handlePurchase = async (packageOption: typeof packages[0]) => {
+    if (!account) {
+      await connectWallet();
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const success = await sendTransaction(packageOption.price);
+      if (success) {
+        toast.success(`Successfully purchased ${packageOption.coins.toLocaleString()} coins!`);
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      toast.error("Purchase failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -105,10 +131,27 @@ export const PurchaseOptions = () => {
             )}
 
             <Button 
-              className="bg-[#FF0000] hover:bg-[#FF0000]/90 text-white font-semibold rounded-full px-8 min-w-[120px]"
+              className={`flex items-center space-x-2 ${
+                account 
+                  ? "bg-[#FF0000] hover:bg-[#FF0000]/90" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white font-semibold rounded-full px-8 min-w-[180px]`}
               onClick={() => handlePurchase(pkg)}
+              disabled={isProcessing}
             >
-              ${pkg.price}
+              {isProcessing ? (
+                <span>Processing...</span>
+              ) : account ? (
+                <>
+                  <span>{pkg.price} ETH</span>
+                  <span className="text-sm opacity-75">(${pkg.usdPrice})</span>
+                </>
+              ) : (
+                <>
+                  <Wallet className="w-4 h-4" />
+                  <span>Connect Wallet</span>
+                </>
+              )}
             </Button>
           </div>
         </Card>

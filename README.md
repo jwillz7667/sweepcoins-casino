@@ -1,69 +1,189 @@
-# Welcome to your Lovable project
+# SweepCoins Casino
 
-## Project info
+A modern, secure, and feature-rich online casino platform built with Supabase and React.
 
-**URL**: https://lovable.dev/projects/0195f0a0-6a36-457d-afd4-465d953aac8a
+## Features
 
-## How can I edit this code?
+### 🎮 Games
+- Multiple game types: Slots, Table Games, Live Casino, and Instant Games
+- Popular providers: Pragmatic Play, Evolution Gaming, Playtech
+- In-house instant games: Mines, Plinko
+- Real-time game sessions and bet tracking
 
-There are several ways of editing your application.
+### 💰 Payment System
+- Cryptocurrency integration with MetaMask
+- Multiple transaction types support
+- Secure balance management
+- Transaction history tracking
 
-**Use Lovable**
+### 🎁 Bonus System
+- Welcome bonuses
+- Reload bonuses
+- Weekly cashback
+- VIP rewards
+- Loyalty program
+- Referral system
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0195f0a0-6a36-457d-afd4-465d953aac8a) and start prompting.
+### 👑 VIP Program
+- 5-tier VIP system (Bronze to Diamond)
+- Progressive rewards
+- Weekly bonuses
+- Cashback rates
+- Point-based progression
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎯 Features
+- Real-time jackpots
+- Game favorites
+- User profiles
+- KYC verification
+- Comprehensive transaction history
+- Secure authentication
 
-**Use your preferred IDE**
+## Technology Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React, TypeScript, TailwindCSS
+- **Backend**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Database**: PostgreSQL with RLS (Row Level Security)
+- **Payments**: Web3/MetaMask Integration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Database Schema
 
-Follow these steps:
+### Core Tables
+- `profiles`: User profiles and balances
+- `games`: Game catalog and configurations
+- `game_sessions`: Active and historical game sessions
+- `bets`: Bet records and outcomes
+- `transactions`: Financial transaction records
+- `crypto_transactions`: Cryptocurrency transaction records
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Feature Tables
+- `jackpots`: Progressive jackpot management
+- `user_favorites`: User's favorite games
+- `bonuses`: User bonus records
+- `vip_levels`: VIP tier configurations
+- `user_vip_progress`: User VIP progression
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Security Features
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Row Level Security (RLS) policies for all tables
+- Secure password hashing
+- Protected API endpoints
+- Transaction-level consistency
+- Audit logging
+- KYC verification system
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Getting Started
+
+### Prerequisites
+- Node.js 16+
+- Supabase CLI
+- Git
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/sweepcoins-casino.git
+cd sweepcoins-casino
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up Supabase:
+```bash
+supabase init
+supabase start
+```
+
+4. Run database migrations:
+```bash
+supabase db reset
+```
+
+5. Create environment variables:
+```bash
+cp .env.example .env.local
+```
+Edit `.env.local` with your Supabase credentials.
+
+6. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Database Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The database schema includes:
+- Enum types for various statuses
+- Tables with proper relationships
+- Indexes for performance
+- Triggers for automated updates
+- RLS policies for security
+- Stored procedures for complex operations
 
-**Use GitHub Codespaces**
+### Initial Data
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The seed file provides:
+- VIP level configurations
+- Initial game catalog
+- Jackpot configurations
+- Admin user creation function
 
-## What technologies are used for this project?
+## Development
 
-This project is built with .
+### Code Structure
+```
+src/
+├── components/
+│   ├── games/
+│   ├── dashboard/
+│   ├── ui/
+│   └── wallet/
+├── contexts/
+│   ├── AuthContext
+│   └── Web3Context
+├── hooks/
+├── pages/
+└── utils/
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Key Files
+- `supabase/migrations/`: Database migrations
+- `supabase/seed.sql`: Initial data
+- `src/App.tsx`: Main application component
+- `src/contexts/`: Application contexts
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/0195f0a0-6a36-457d-afd4-465d953aac8a) and click on Share -> Publish.
+1. Set up production Supabase project
+2. Configure environment variables
+3. Run migrations on production database
+4. Deploy frontend to your hosting provider
 
-## I want to use a custom domain - is that possible?
+## Security Considerations
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- All database access is controlled through RLS policies
+- User authentication is handled by Supabase Auth
+- Cryptocurrency transactions are verified on-chain
+- Sensitive data is encrypted
+- Regular security audits recommended
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, email support@sweepcoins.com or join our Discord community.
