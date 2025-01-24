@@ -105,14 +105,14 @@ export const PurchaseOptions = () => {
             </span>
           </div>
 
-          <div className="flex items-center justify-between flex-1 pl-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between flex-1 pl-4 md:pl-8 mt-4 md:mt-0">
             {pkg.tag && (
               <span className="absolute -top-3 left-4 bg-[#00FF47] text-black px-3 py-0.5 rounded-full text-sm font-medium">
                 {pkg.tag}
               </span>
             )}
             
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mb-4 md:mb-0">
               <div className="flex flex-col items-center bg-[#222222] p-2 rounded-lg">
                 <GamepadIcon className="h-5 w-5 text-yellow-400 mb-1" />
                 <span className="text-xs">Exclusive Games</span>
@@ -125,17 +125,17 @@ export const PurchaseOptions = () => {
             </div>
 
             {pkg.freeSC > 0 && (
-              <div className="bg-[#003311] text-[#00FF47] px-3 py-1 rounded-lg text-sm">
+              <div className="bg-[#003311] text-[#00FF47] px-3 py-1 rounded-lg text-sm mb-4 md:mb-0">
                 💵 FREE SC {pkg.freeSC}
               </div>
             )}
 
             <Button 
-              className={`flex items-center space-x-2 ${
+              className={`flex items-center space-x-2 w-full md:w-auto ${
                 account 
                   ? "bg-[#FF0000] hover:bg-[#FF0000]/90" 
                   : "bg-blue-600 hover:bg-blue-700"
-              } text-white font-semibold rounded-full px-8 min-w-[180px]`}
+              } text-white font-semibold rounded-full px-8`}
               onClick={() => handlePurchase(pkg)}
               disabled={isProcessing}
             >
