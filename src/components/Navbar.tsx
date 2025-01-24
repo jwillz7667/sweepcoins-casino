@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Coins, Search, Bell, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -21,7 +22,7 @@ export const Navbar = () => {
                 <div className="flex items-center justify-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
                   <Coins className="inline h-4 w-4 text-accent mr-1.5" />
                   <span className="text-accent font-medium">
-                    {user.sweepcoins.toLocaleString()}
+                    {(user.sweepcoins || 0).toLocaleString()}
                   </span>
                 </div>
                 <Button 
@@ -29,9 +30,7 @@ export const Navbar = () => {
                   size="sm"
                   className="bg-[#39FF14] hover:bg-[#39FF14]/90 text-primary font-semibold"
                 >
-                  <Link to="/purchase" className="flex items-center gap-2">
-                    Get Coins
-                  </Link>
+                  <Link to="/purchase">Get Coins</Link>
                 </Button>
               </div>
               <div className="flex items-center gap-2">

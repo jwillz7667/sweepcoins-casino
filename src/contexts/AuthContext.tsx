@@ -28,19 +28,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
-    }
+        if (error) {
+          console.error('Error fetching user profile:', error);
+          return null;
+        }
 
-    return profile;
-  };
+        return profile || { id: userId, username: '', sweepcoins: 0 };
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        return { id: userId, username: '', sweepcoins: 0 };
+      }
+    };
 
   // Update user state with profile data
   const updateUserState = async (supabaseUser: User | null) => {
@@ -102,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) throw error;
-      
+
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (error) {
