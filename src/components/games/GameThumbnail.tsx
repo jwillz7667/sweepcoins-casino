@@ -28,7 +28,7 @@ export const GameThumbnail = ({
           NEW
         </div>
       )}
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[4/5] overflow-hidden">
         {image ? (
           <img 
             src={image} 

@@ -35,7 +35,7 @@ export const GameCarousel = ({ title, icon: Icon, games }: GameCarouselProps) =>
           {games.map((game, index) => (
             <CarouselItem
               key={index}
-              className="pl-2 md:pl-4 basis-[42%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+              className="pl-2 md:pl-4 basis-[38%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
             >
               <GameCard {...game} className="h-full" />
             </CarouselItem>
