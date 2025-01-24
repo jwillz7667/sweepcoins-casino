@@ -19,7 +19,7 @@ export const Navbar = () => {
     <nav className="border-b">
       <div className="container flex h-16 items-center px-2">
         <div className="flex w-full items-center justify-between gap-2">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/dashboard" className="flex items-center space-x-2">
             <Coins className="h-6 w-6 text-yellow-400" />
             <span className="text-lg font-bold">SweepCoins</span>
           </Link>
