@@ -1,7 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { Coins, Search, Bell, Menu } from "lucide-react";
+import { Coins, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SearchDialog } from "./SearchDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -41,12 +42,7 @@ export const Navbar = () => {
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Search className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-5 w-5" />
-                </Button>
+                <SearchDialog />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
