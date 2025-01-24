@@ -97,7 +97,7 @@ export const GameDialogContent = ({
                   <img src="/placeholder.svg" alt="McJackpot" className="h-8" />
                 </div>
                 <Button variant="outline" className="border-[#32CD32] text-[#32CD32] hover:bg-[#32CD32] hover:text-black">
-                  Opt In to McJackpots
+                  Opt Into Jackpot
                 </Button>
               </div>
               <div className="text-sm text-gray-400 mt-2 flex items-center gap-1">
