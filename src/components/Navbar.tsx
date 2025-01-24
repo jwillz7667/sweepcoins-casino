@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Coins, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,30 +15,19 @@ export const Navbar = () => {
   const { user, signOut } = useAuth();
 
   return (
-    <nav className="container">
-      <div className="flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center space-x-2">
-          <Coins className="h-8 w-8 text-accent" />
-          <span className="text-xl font-bold text-foreground">SweepCoins Casino</span>
-        </Link>
-        
-        <div className="flex items-center gap-4">
+    <nav className="border-b">
+      <div className="container flex h-16 items-center">
+        <div className="flex w-full items-center justify-between">
+          <Link to="/" className="flex items-center space-x-2">
+            <Coins className="h-6 w-6 text-yellow-400" />
+            <span className="text-xl font-bold">SweepCoins</span>
+          </Link>
           {user ? (
             <>
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="flex items-center justify-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
-                  <Coins className="inline h-4 w-4 text-accent mr-1.5" />
-                  <span className="text-accent font-medium">
-                    {(user.sweepcoins || 0).toLocaleString()}
-                  </span>
-                </div>
-                <Button 
-                  variant="secondary"
-                  size="sm"
-                  className="bg-[#39FF14] hover:bg-[#39FF14]/90 text-primary font-semibold"
-                >
-                  <Link to="/purchase">Get Coins</Link>
-                </Button>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  {user.sweepcoins} SC
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <SearchDialog />
