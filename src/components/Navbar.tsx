@@ -17,26 +17,26 @@ export const Navbar = () => {
 
   return (
     <nav className="border-b">
-      <div className="container flex h-20 items-center px-4">
-        <div className="flex w-full items-center justify-between gap-6">
-          <Link to="/" className="flex items-center space-x-3">
-            <Coins className="h-7 w-7 text-yellow-400" />
-            <span className="text-xl font-bold">SweepCoins</span>
+      <div className="container flex h-16 items-center px-2">
+        <div className="flex w-full items-center justify-between gap-2">
+          <Link to="/" className="flex items-center space-x-2">
+            <Coins className="h-6 w-6 text-yellow-400" />
+            <span className="text-lg font-bold">SweepCoins</span>
           </Link>
           {user ? (
             <>
-              <div className="flex flex-1 items-center justify-center gap-8">
-                <span className="text-sm text-muted-foreground flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-lg">
-                  <Coins className="h-4 w-4 text-yellow-400" />
-                  {user.sweepcoins} SC
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg">
+                  <Coins className="h-3 w-3 text-yellow-400" />
+                  {user.sweepcoins}
                 </span>
                 <Link to="/purchase">
-                  <Button className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold px-6">
-                    BUY COINS
+                  <Button size="sm" className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold px-3">
+                    BUY
                   </Button>
                 </Link>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <SearchDialog />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
