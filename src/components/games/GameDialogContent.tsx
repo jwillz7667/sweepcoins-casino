@@ -27,8 +27,8 @@ export const GameDialogContent = ({
   maxWinMultiplier = 5000
 }: GameDialogContentProps) => {
   return (
-    <DialogContent className="sm:max-w-[600px] bg-black/95 p-0 gap-0">
-      <div className="space-y-4">
+    <DialogContent className="sm:max-w-[600px] bg-black/95 p-0 gap-0 w-[95vw] max-h-[90vh] overflow-y-auto">
+      <div className="space-y-2">
         {/* Game Preview */}
         <div className="relative aspect-video">
           <img 
@@ -36,15 +36,15 @@ export const GameDialogContent = ({
             alt={`${title} gameplay`} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-4 left-4 flex items-center gap-2">
-            <button className="p-2 rounded-full bg-black/50 hover:bg-black/70">
-              <Info className="w-5 h-5" />
+          <div className="absolute top-2 left-2 flex items-center gap-2">
+            <button className="p-1.5 rounded-full bg-black/50 hover:bg-black/70">
+              <Info className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Game Info */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-white">{title}</DialogTitle>
             <p className="text-sm text-gray-400">{description}</p>
@@ -79,12 +79,12 @@ export const GameDialogContent = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-2 pt-4">
-              <Button className="w-full bg-white text-black hover:bg-white/90 font-semibold py-6">
+            <div className="space-y-2 pt-2">
+              <Button className="w-full bg-white text-black hover:bg-white/90 font-semibold py-4 text-sm">
                 Play with Gold Coins
               </Button>
-              <Button className="w-full bg-[#32CD32] hover:bg-[#32CD32]/90 text-black font-semibold py-6">
-                <span className="mr-2">💰</span>
+              <Button className="w-full bg-[#32CD32] hover:bg-[#32CD32]/90 text-black font-semibold py-4 text-sm">
+                <span className="mr-1">💰</span>
                 Enter Sweepstakes
               </Button>
             </div>
