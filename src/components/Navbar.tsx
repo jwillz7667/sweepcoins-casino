@@ -25,9 +25,15 @@ export const Navbar = () => {
           {user ? (
             <>
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Coins className="h-4 w-4 text-yellow-400" />
                   {user.sweepcoins} SC
                 </span>
+                <Link to="/purchase">
+                  <Button className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold">
+                    BUY COINS
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center gap-2">
                 <SearchDialog />
