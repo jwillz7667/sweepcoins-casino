@@ -49,7 +49,7 @@ export const TransactionHistory = () => {
                   {transaction.balance_after}
                 </div>
               </TableCell>
-              <TableCell>{transaction.description || "-"}</TableCell>
+              <TableCell>{(transaction.metadata as { description?: string })?.description || "-"}</TableCell>
               <TableCell>
                 {format(new Date(transaction.created_at), "MMM d, yyyy HH:mm")}
               </TableCell>
