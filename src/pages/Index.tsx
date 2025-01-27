@@ -7,9 +7,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90">
       <Navbar />
-      <HeroSection />
-      <FeaturesSection />
-      <CTASection />
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <CTASection />
+      </main>
     </div>
   );
 };
