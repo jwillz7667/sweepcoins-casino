@@ -1,1 +1,7 @@
-/* /index.html 200 
+# Redirects from what the browser requests to what we serve
+/*                    /index.html     200
+/assets/*             /assets/:splat  200
+/api/*                /api/:splat     200
+/static/*             /static/:splat  200
+/manifest.json        /manifest.json  200
+/favicon.ico          /favicon.ico    200 
