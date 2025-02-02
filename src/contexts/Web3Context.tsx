@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { ethers } from "ethers";
+import { ethers, BrowserProvider, Signer, parseEther } from "ethers";
 import Web3Modal from "web3modal";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ interface Web3ProviderProps {
 export const Web3Provider = ({ children }: Web3ProviderProps) => {
   const [account, setAccount] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   const web3Modal = new Web3Modal({
     cacheProvider: true,
@@ -38,14 +38,14 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
   const connectWallet = async () => {
     try {
       const instance = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(instance);
-      const signer = provider.getSigner();
+      const provider = new BrowserProvider(instance);
+      const signer = await provider.getSigner();
       const account = await signer.getAddress();
       const network = await provider.getNetwork();
 
       setProvider(provider);
       setAccount(account);
-      setChainId(network.chainId);
+      setChainId(Number(network.chainId));
 
       // Subscribe to accounts change
       instance.on("accountsChanged", (accounts: string[]) => {
@@ -57,8 +57,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
       });
 
       // Subscribe to chainId change
-      instance.on("chainChanged", (chainId: number) => {
-        setChainId(chainId);
+      instance.on("chainChanged", (chainId: string) => {
+        setChainId(Number(chainId));
       });
 
       toast.success("Wallet connected successfully!");
@@ -88,10 +88,10 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     }
 
     try {
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
       const tx = await signer.sendTransaction({
         to: "YOUR_RECEIVING_WALLET_ADDRESS", // Replace with your casino's wallet address
-        value: ethers.utils.parseEther(amount.toString()),
+        value: parseEther(amount.toString()),
       });
 
       toast.success("Transaction sent! Waiting for confirmation...");
@@ -99,7 +99,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
       // Wait for transaction confirmation
       const receipt = await tx.wait();
       
-      if (receipt.status === 1) {
+      if (receipt?.status === 1) {
         toast.success("Transaction confirmed!");
         return true;
       } else {
