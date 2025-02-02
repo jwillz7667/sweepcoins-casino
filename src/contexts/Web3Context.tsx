@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { ethers, BrowserProvider, Signer, parseEther } from "ethers";
 import Web3Modal from "web3modal";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ interface Web3ContextType {
 
 const Web3Context = createContext<Web3ContextType | null>(null);
 
-export const useWeb3 = () => {
+const useWeb3Context = () => {
   const context = useContext(Web3Context);
   if (!context) {
     throw new Error("useWeb3 must be used within a Web3Provider");
@@ -35,7 +35,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     providerOptions: {},
   });
 
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     try {
       const instance = await web3Modal.connect();
       const provider = new BrowserProvider(instance);
@@ -66,7 +66,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
       console.error("Error connecting wallet:", error);
       toast.error("Failed to connect wallet");
     }
-  };
+  }, [web3Modal]);
 
   const disconnectWallet = async () => {
     try {
@@ -117,7 +117,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     if (web3Modal.cachedProvider) {
       connectWallet();
     }
-  }, []);
+  }, [connectWallet, web3Modal.cachedProvider]);
 
   return (
     <Web3Context.Provider
@@ -132,4 +132,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
       {children}
     </Web3Context.Provider>
   );
-}; 
+};
+
+export { Web3Context };
+
+export const useWeb3 = useWeb3Context; 

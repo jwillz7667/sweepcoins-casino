@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,27 +28,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle();
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching user profile:', error);
-          return null;
-        }
-
-        return profile || { id: userId, username: '', sweepcoins: 0 };
-      } catch (error) {
+      if (error) {
         console.error('Error fetching user profile:', error);
-        return { id: userId, username: '', sweepcoins: 0 };
+        return null;
       }
-    };
+
+      return profile || { id: userId, username: '', sweepcoins: 0 };
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return { id: userId, username: '', sweepcoins: 0 };
+    }
+  };
 
   // Update user state with profile data
-  const updateUserState = async (supabaseUser: User | null) => {
+  const updateUserState = useCallback(async (supabaseUser: User | null) => {
     if (!supabaseUser) {
       setUser(null);
       return;
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         sweepcoins: profile.sweepcoins,
       });
     }
-  };
+  }, []);
 
   // Initialize auth state
   useEffect(() => {
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [updateUserState]);
 
   const handleAuthError = (error: AuthError) => {
     console.error('Auth error:', error);
@@ -156,6 +156,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
+// Export the context for internal use
+export { AuthContext };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
