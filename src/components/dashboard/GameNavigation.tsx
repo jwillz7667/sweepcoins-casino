@@ -30,17 +30,17 @@ export const GameNavigation = () => {
   ];
 
   return (
-    <nav className="container overflow-x-auto">
-      <div className="flex items-center gap-2 px-4 py-2 min-w-max">
+    <nav className="container overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-3 px-4 py-3 min-w-max">
         {navItems.map((item) => (
           <button
             key={item.label}
             onClick={() => scrollToCategory(item.categoryId)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+              "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
               pathname === item.href
-                ? "bg-accent/10 text-accent border border-accent/20"
-                : "text-white/80 hover:bg-white/5"
+                ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_10px_rgba(236,72,153,0.1)]"
+                : "text-white/70 hover:text-white/90 hover:bg-white/5"
             )}
           >
             <item.icon className="w-4 h-4" />

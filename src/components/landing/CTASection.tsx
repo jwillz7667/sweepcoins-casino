@@ -1,24 +1,24 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const CTASection = () => {
   return (
-    <section className="container py-20">
-      <div className="glass-morphism rounded-2xl p-12 text-center neo-blur">
-        <Sparkles className="h-16 w-16 text-accent mx-auto mb-6 animate-glow" />
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-          Ready to Start Winning?
-        </h2>
-        <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-          Join thousands of players and start your winning streak today. Get 1000 SweepCoins as a welcome bonus!
-        </p>
-        <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 neo-blur">
-          <Link to="/auth" className="flex items-center space-x-2">
-            <span>Claim Your Bonus</span>
-            <ArrowRight className="h-4 w-4" />
+    <section className="py-20 md:py-32">
+      <div className="container">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+            Ready to Start Your Gaming Journey?
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground mb-8">
+            Join our community of players and experience the thrill of winning today.
+          </p>
+          <Link to="/auth">
+            <Button size="lg" className="neo-blur">
+              Create Your Account
+              <span aria-hidden="true">→</span>
+            </Button>
           </Link>
-        </Button>
+        </div>
       </div>
     </section>
   );

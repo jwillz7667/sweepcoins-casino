@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/Navbar";
 import { PurchaseOptions } from "@/components/purchase/PurchaseOptions";
 import { Coins } from "lucide-react";
 
@@ -7,8 +6,7 @@ export const Purchase = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
+    <div className="min-h-screen bg-background">
       <main className="container py-8 md:py-16">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">

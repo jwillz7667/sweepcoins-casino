@@ -1,0 +1,108 @@
+# Custom AI Coding Assistant Cursor Rules
+
+These rules are designed specifically for our Next.js project built with modern React, Shadcn UI, Radix UI, Tailwind CSS, and TypeScript. Follow these guidelines when generating or refactoring code to ensure consistency, maintainability, and best practices throughout the codebase.
+
+-----------------------------------------------------------
+1. Project File Structure
+-----------------------------------------------------------
+- Use the Next.js App Router directory structure with an `app/` folder.
+- Place route components in files named `page.js`/`page.tsx`.
+- Use `layout.js`/`layout.tsx` for shared layouts and global wrappers.
+- Include special files such as `loading.js` (or `loading.tsx`) for component-level loading states and `error.js` for error boundaries.
+- Reusable components should reside in the `components/` directory and be further organized (e.g., UI components in `components/ui`).
+- Contexts, hooks, and utilities should be kept in clearly named directories (e.g., `contexts/`, `hooks/`, `utils/`).
+
+-----------------------------------------------------------
+2. React and TypeScript
+-----------------------------------------------------------
+- Use functional components with hooks (e.g., useState, useEffect, useContext).
+- Default to Server Components where possible. Add the "use client" directive at the top of client-side files when local state or effects are needed.
+- Write components in modern ES6+ syntax.
+- Use TypeScript for type safety. Always define types or interfaces for props and state where appropriate.
+- Maintain concise, readable code following the DRY (Don't Repeat Yourself) principle.
+- Leverage early returns in functions to simplify conditional logic.
+
+-----------------------------------------------------------
+3. UI Libraries: Shadcn UI and Radix UI
+-----------------------------------------------------------
+- Import Shadcn UI components from '@/components/ui' as configured by the schema.
+- Use Radix UI primitives (e.g., Accordion, Tabs, NavigationMenu, Tooltip) for complex, accessible interactive components.
+- Customize components using configuration options (e.g., through the Tailwind config) and utility functions like `cn()` for conditional class names.
+- Follow the component patterns as seen in our codebase to ensure consistency with visual and accessibility standards.
+
+-----------------------------------------------------------
+4. Tailwind CSS
+-----------------------------------------------------------
+- Use Tailwind utility classes for styling HTML elements directly.
+- In CSS modules, utilize the `@apply` directive to create reusable style patterns.
+- Use the `cn()` utility for constructing dynamic className strings.
+- Keep the Tailwind configuration (`tailwind.config.ts`) updated with the current theme, color variables, and responsive breakpoints.
+- Avoid inline styles; prefer utility classes over custom CSS wherever possible.
+
+-----------------------------------------------------------
+5. Data Fetching Strategy
+-----------------------------------------------------------
+- Use Next.js Server Components for data fetching whenever possible.
+- When in client components, use libraries such as React Query (e.g., @tanstack/react-query) to manage asynchronous data and caching.
+- Implement loading states with React Suspense and/or dedicated `loading.js` files.
+- Use built-in Next.js caching and revalidation strategies for optimal performance.
+
+-----------------------------------------------------------
+6. Routing and Navigation
+-----------------------------------------------------------
+- Utilize file-based routing with Next.js App Router; dynamic routes use the bracket syntax (e.g., `[id].tsx`).
+- Use the Next.js `<Link>` component for client-side navigation.
+- For complex navigation menus, leverage Radix UI and Shadcn UI components to ensure accessible and responsive experiences.
+- Keep routing logic simple and clearly document dynamic parameters.
+
+-----------------------------------------------------------
+7. State Management
+-----------------------------------------------------------
+- Use React hooks such as useState and useReducer for local component state.
+- Utilize useContext for global state management (e.g., AuthContext, Web3Context).
+- For extensive state, rely on external libraries only if necessary.
+- Ensure state updates are predictable and leverage memoization (useMemo, useCallback) when needed.
+
+-----------------------------------------------------------
+8. Performance Optimization
+-----------------------------------------------------------
+- Use dynamic imports and code splitting to reduce initial bundle size.
+- Leverage Next.js built-in optimizations such as automatic static optimization and Image component optimizations.
+- Optimize component renders using memoization and avoiding unnecessary re-renders.
+- Make sure to use proper keys in lists and handle heavy computations off the main thread if needed.
+
+-----------------------------------------------------------
+9. Accessibility
+-----------------------------------------------------------
+- Always use semantic HTML elements and enforce proper ARIA attributes as needed.
+- Default to Radix UI components which come with built-in accessibility support.
+- Ensure all interactive elements (buttons, links, triggers) have accessible labels, tabIndex, and keyboard-handling.
+- Regularly audit UI components for accessibility conformance.
+
+-----------------------------------------------------------
+10. Best Practices and Code Quality
+-----------------------------------------------------------
+- Adhere to the DRY principle; avoid code duplication.
+- Use descriptive names for variables, functions, and components.
+- Prefix event handler functions with "handle" (e.g., handleClick, handleKeyDown).
+- Write unit tests for components, hooks, and utility functions.
+- Implement proper error handling and fallback UIs (Error Boundaries, Skeleton loaders).
+- Keep ESLint and TypeScript configurations (e.g., tsconfig.app.json, .eslintrc) in sync with coding standards.
+- Commit code with clear messages and maintain thorough documentation in the README file.
+
+-----------------------------------------------------------
+11. Additional Considerations
+-----------------------------------------------------------
+- Use Chain of Thought reasoning to solve problems.
+- Maintain consistency in component naming and file organization to streamline collaboration.
+- Update environment variables securely and keep sensitive configurations (e.g., Supabase credentials) out of the codebase.
+- Follow modernization trends by leveraging React’s latest features and Next.js improvements.
+- Ensure that any new features or refactors align with the overall project architecture and established .cursorrules.
+- Review the codebase and documentation periodically to adapt and expand these rules as project requirements evolve.
+
+-----------------------------------------------------------
+Notes:
+-----------------------------------------------------------
+- This file is a living document and should be updated as new libraries are added or best practices evolve.
+- The AI coding assistant should use these instructions as a foundation when generating, refactoring, or reviewing code.
+- Always reference the latest project README, Tailwind configuration, and component standards when in doubt.

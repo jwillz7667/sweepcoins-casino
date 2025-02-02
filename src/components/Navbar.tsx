@@ -1,3 +1,4 @@
+"use client";
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,7 @@ export const Navbar = () => {
                   {user.sweepcoins}
                 </span>
                 <Link to="/purchase">
-                  <Button size="sm" className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold px-3">
-                    BUY
-                  </Button>
+                  <Button size="sm">BUY</Button>
                 </Link>
               </div>
               <div className="flex items-center gap-2">
@@ -78,9 +77,9 @@ export const Navbar = () => {
               </div>
             </>
           ) : (
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
-              <Link to="/auth">Sign In</Link>
-            </Button>
+            <Link to="/auth">
+              <Button>Sign In</Button>
+            </Link>
           )}
         </div>
       </div>
