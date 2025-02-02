@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from "react";
 import { ethers, BrowserProvider, Signer, parseEther } from "ethers";
 import Web3Modal from "web3modal";
 import { toast } from "sonner";
@@ -13,14 +13,6 @@ interface Web3ContextType {
 
 const Web3Context = createContext<Web3ContextType | null>(null);
 
-const useWeb3Context = () => {
-  const context = useContext(Web3Context);
-  if (!context) {
-    throw new Error("useWeb3 must be used within a Web3Provider");
-  }
-  return context;
-};
-
 interface Web3ProviderProps {
   children: ReactNode;
 }
@@ -30,10 +22,14 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
   const [chainId, setChainId] = useState<number | null>(null);
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
-  const web3Modal = new Web3Modal({
-    cacheProvider: true,
-    providerOptions: {},
-  });
+  const web3Modal = useMemo(
+    () =>
+      new Web3Modal({
+        cacheProvider: true,
+        providerOptions: {},
+      }),
+    []
+  );
 
   const connectWallet = useCallback(async () => {
     try {
@@ -134,6 +130,4 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
   );
 };
 
-export { Web3Context };
-
-export const useWeb3 = useWeb3Context; 
+export { Web3Context }; 

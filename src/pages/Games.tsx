@@ -5,51 +5,51 @@ const Games: FC = () => {
   const games = [
     {
       id: 1,
-      name: "Slots Paradise",
+      title: "Slots Paradise",
       description: "Experience the thrill of our most popular slot games",
       image: "/games/slots.jpg",
-      category: "slots",
-      popularity: 98,
+      volatility: "high" as const,
+      rtp: 96.5,
     },
     {
       id: 2,
-      name: "Blackjack Pro",
+      title: "Blackjack Pro",
       description: "Classic blackjack with modern twists",
       image: "/games/blackjack.jpg",
-      category: "table",
-      popularity: 95,
+      volatility: "low" as const,
+      rtp: 99.5,
     },
     {
       id: 3,
-      name: "Roulette Royale",
+      title: "Roulette Royale",
       description: "European and American roulette variants",
       image: "/games/roulette.jpg",
-      category: "table",
-      popularity: 92,
+      volatility: "medium" as const,
+      rtp: 97.3,
     },
     {
       id: 4,
-      name: "Poker Master",
+      title: "Poker Master",
       description: "Texas Hold'em and other popular variants",
       image: "/games/poker.jpg",
-      category: "table",
-      popularity: 94,
+      volatility: "medium" as const,
+      rtp: 98.2,
     },
     {
       id: 5,
-      name: "Lucky Dice",
+      title: "Lucky Dice",
       description: "Fast-paced dice games with instant wins",
       image: "/games/dice.jpg",
-      category: "instant",
-      popularity: 88,
+      volatility: "high" as const,
+      rtp: 95.8,
     },
     {
       id: 6,
-      name: "Baccarat Elite",
+      title: "Baccarat Elite",
       description: "High-stakes baccarat action",
       image: "/games/baccarat.jpg",
-      category: "table",
-      popularity: 90,
+      volatility: "low" as const,
+      rtp: 98.9,
     },
   ];
 
@@ -66,11 +66,11 @@ const Games: FC = () => {
         {games.map((game) => (
           <GameCard
             key={game.id}
-            name={game.name}
+            title={game.title}
             description={game.description}
             image={game.image}
-            category={game.category}
-            popularity={game.popularity}
+            volatility={game.volatility}
+            rtp={game.rtp}
           />
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
 import { PurchaseOptions } from "@/components/purchase/PurchaseOptions";
 import { Coins } from "lucide-react";
 
@@ -15,7 +15,7 @@ export const Purchase = () => {
             </h1>
             <div className="flex items-center space-x-2 text-yellow-400">
               <Coins className="h-6 w-6" />
-              <span className="font-medium">Current Balance: 0 GC</span>
+              <span className="font-medium">Current Balance: {user?.sweepcoins || 0} GC</span>
             </div>
           </div>
           <PurchaseOptions />

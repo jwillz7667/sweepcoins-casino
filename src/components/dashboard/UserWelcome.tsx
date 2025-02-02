@@ -1,5 +1,5 @@
 import { Coins } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const UserWelcome = () => {
