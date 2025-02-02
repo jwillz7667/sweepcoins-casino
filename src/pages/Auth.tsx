@@ -23,11 +23,11 @@ export const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary/90 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md glass-morphism">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-6">
-            <Coins className="h-12 w-12 text-accent animate-float animate-glow" />
+            <Coins className="h-12 w-12 text-yellow-400 animate-pulse" />
           </div>
           <CardTitle className="text-2xl text-center">
             {isLogin ? "Welcome Back!" : "Create an Account"}
@@ -80,13 +80,13 @@ export const Auth = () => {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button type="submit" className="w-full">
               {isLogin ? "Sign In" : "Sign Up"}
             </Button>
             <Button
               type="button"
               variant="ghost"
-              className="w-full hover:bg-white/5"
+              className="w-full"
               onClick={() => setIsLogin(!isLogin)}
             >
               {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
