@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PurchaseOptions } from "@/components/purchase/PurchaseOptions";
 import { Coins } from "lucide-react";
 
-export const Purchase = () => {
+const Purchase = () => {
   const { user } = useAuth();
 
   return (
@@ -24,3 +24,5 @@ export const Purchase = () => {
     </div>
   );
 };
+
+export default Purchase;

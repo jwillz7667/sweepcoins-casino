@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  preview: {
+    port: 8080,
+    strictPort: true,
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

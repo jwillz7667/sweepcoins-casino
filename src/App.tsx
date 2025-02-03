@@ -5,69 +5,91 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Web3Provider } from "@/contexts/Web3Context";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Suspense, lazy } from "react";
+
+// Error Boundary Component
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 
 // Main Pages
-import Index from "@/pages/Index";
-import { Auth } from "@/pages/Auth";
-import { Dashboard } from "@/pages/Dashboard";
-import { Purchase } from "@/pages/Purchase";
+const Index = lazy(() => import("@/pages/Index"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Purchase = lazy(() => import("@/pages/Purchase"));
 
 // Legal & Policy Pages
-import TermsAndConditions from "@/pages/TermsAndConditions";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import KYCPolicy from "@/pages/KYCPolicy";
-import ResponsibleGaming from "@/pages/ResponsibleGaming";
+const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const KYCPolicy = lazy(() => import("@/pages/KYCPolicy"));
+const ResponsibleGaming = lazy(() => import("@/pages/ResponsibleGaming"));
 
 // Additional Pages
-import Games from "@/pages/Games";
-import Promotions from "@/pages/Promotions";
-import VIPProgram from "@/pages/VIPProgram";
-import About from "@/pages/About";
-import FAQ from "@/pages/FAQ";
-import Support from "@/pages/Support";
+const Games = lazy(() => import("@/pages/Games"));
+const Promotions = lazy(() => import("@/pages/Promotions"));
+const VIPProgram = lazy(() => import("@/pages/VIPProgram"));
+const About = lazy(() => import("@/pages/About"));
+const FAQ = lazy(() => import("@/pages/FAQ"));
+const Support = lazy(() => import("@/pages/Support"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Loading component
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <Web3Provider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <div className="flex-grow">
-                <Routes>
-                  {/* Main Routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/purchase" element={<Purchase />} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <AuthProvider>
+            <Web3Provider>
+              <div className="min-h-screen flex flex-col bg-background text-foreground">
+                <Navbar />
+                <div className="flex-grow">
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      {/* Main Routes */}
+                      <Route path="/" element={<Index />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/purchase" element={<Purchase />} />
 
-                  {/* Game & Promotion Routes */}
-                  <Route path="/games" element={<Games />} />
-                  <Route path="/promotions" element={<Promotions />} />
-                  <Route path="/vip" element={<VIPProgram />} />
+                      {/* Game & Promotion Routes */}
+                      <Route path="/games" element={<Games />} />
+                      <Route path="/promotions" element={<Promotions />} />
+                      <Route path="/vip" element={<VIPProgram />} />
 
-                  {/* Information Routes */}
-                  <Route path="/about" element={<About />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/support" element={<Support />} />
+                      {/* Information Routes */}
+                      <Route path="/about" element={<About />} />
+                      <Route path="/faq" element={<FAQ />} />
+                      <Route path="/support" element={<Support />} />
 
-                  {/* Legal & Policy Routes */}
-                  <Route path="/terms" element={<TermsAndConditions />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/kyc" element={<KYCPolicy />} />
-                  <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
-                </Routes>
+                      {/* Legal & Policy Routes */}
+                      <Route path="/terms" element={<TermsAndConditions />} />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/kyc" element={<KYCPolicy />} />
+                      <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
+                    </Routes>
+                  </Suspense>
+                </div>
+                <Footer />
               </div>
-              <Footer />
-            </div>
-            <Toaster />
-          </Web3Provider>
-        </AuthProvider>
-      </Router>
-    </QueryClientProvider>
+              <Toaster />
+            </Web3Provider>
+          </AuthProvider>
+        </Router>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -2,7 +2,7 @@ import { GameCategories } from "@/components/games/GameCategories";
 import { PromotionalBanner } from "@/components/dashboard/PromotionalBanner";
 import { GameNavigation } from "@/components/dashboard/GameNavigation";
 
-export const Dashboard = () => {
+const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative">
@@ -26,3 +26,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;
