@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Coins, MessageCircle, GamepadIcon, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { useWeb3 } from "@/contexts/Web3Context";
+import { useWeb3 } from "@/hooks/use-web3";
 import { useState } from "react";
 
 const packages = [
