@@ -21,6 +21,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Add LoadingSpinner component at the top level of the file, after imports
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+  </div>
+);
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,12 +76,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        console.log('Initializing auth state...');
         const { data: { session } } = await supabase.auth.getSession();
-        await updateUserState(session?.user || null);
+        console.log('Got session:', session);
+        
+        if (session?.user) {
+          console.log('Session exists, fetching user profile...');
+          const profile = await fetchUserProfile(session.user.id);
+          console.log('Fetched profile:', profile);
+          
+          if (profile) {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              username: profile.username || '',
+              sweepcoins: profile.sweepcoins,
+            });
+            console.log('User state initialized:', {
+              id: session.user.id,
+              email: session.user.email,
+              username: profile.username,
+              sweepcoins: profile.sweepcoins,
+            });
+          }
+        } else {
+          console.log('No session found');
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
         setLoading(false);
+        console.log('Auth initialization complete');
       }
     };
 
@@ -82,7 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', { event, userId: session?.user?.id });
       await updateUserState(session?.user || null);
     });
 
@@ -101,16 +134,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting sign in...', { email });
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('Sign in response:', { error, session: data?.session });
+
       if (error) throw error;
 
-      toast.success('Welcome back!');
-      navigate('/dashboard');
+      // Wait for profile data to be updated
+      const profile = await fetchUserProfile(data.session.user.id);
+      console.log('Fetched user profile:', profile);
+
+      if (profile) {
+        // Update user state using state updater
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email || '',
+          username: profile.username || '',
+          sweepcoins: profile.sweepcoins,
+        });
+
+        console.log('User state updated:', {
+          id: data.session.user.id,
+          email: data.session.user.email,
+          username: profile.username,
+          sweepcoins: profile.sweepcoins,
+        });
+
+        // Show success message and navigate after state is updated
+        toast.success('Welcome back!');
+        console.log('Navigating to dashboard...');
+        navigate('/dashboard', { replace: true });
+      }
     } catch (error) {
+      console.error('Sign in error:', error);
       handleAuthError(error as AuthError);
     }
   };
@@ -152,7 +212,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
-      {!loading && children}
+      {loading ? <LoadingSpinner /> : children}
     </AuthContext.Provider>
   );
 };

@@ -9,12 +9,14 @@ import { Suspense, lazy } from "react";
 
 // Error Boundary Component
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 // Main Pages
 const Index = lazy(() => import("@/pages/Index"));
-const Auth = lazy(() => import("@/pages/Auth"));
+const AuthPage = lazy(() => import("@/pages/Auth"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Purchase = lazy(() => import("@/pages/Purchase"));
+const PurchaseSuccess = lazy(() => import("@/pages/PurchaseSuccess"));
 
 // Legal & Policy Pages
 const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
@@ -58,27 +60,60 @@ function App() {
                 <div className="flex-grow">
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
-                      {/* Main Routes */}
+                      {/* Public Routes */}
                       <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/purchase" element={<Purchase />} />
+                      <Route path="/auth" element={<AuthPage />} />
 
-                      {/* Game & Promotion Routes */}
-                      <Route path="/games" element={<Games />} />
-                      <Route path="/promotions" element={<Promotions />} />
-                      <Route path="/vip" element={<VIPProgram />} />
+                      {/* Protected Routes */}
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/purchase" element={
+                        <ProtectedRoute>
+                          <Purchase />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/purchase/success" element={
+                        <ProtectedRoute>
+                          <PurchaseSuccess />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/games" element={
+                        <ProtectedRoute>
+                          <Games />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/promotions" element={
+                        <ProtectedRoute>
+                          <Promotions />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/vip" element={
+                        <ProtectedRoute>
+                          <VIPProgram />
+                        </ProtectedRoute>
+                      } />
 
-                      {/* Information Routes */}
+                      {/* Public Information Routes */}
                       <Route path="/about" element={<About />} />
                       <Route path="/faq" element={<FAQ />} />
                       <Route path="/support" element={<Support />} />
-
-                      {/* Legal & Policy Routes */}
                       <Route path="/terms" element={<TermsAndConditions />} />
                       <Route path="/privacy" element={<PrivacyPolicy />} />
                       <Route path="/kyc" element={<KYCPolicy />} />
                       <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
+
+                      {/* Catch-all route for 404s */}
+                      <Route path="*" element={
+                        <div className="min-h-screen flex items-center justify-center">
+                          <div className="text-center">
+                            <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+                            <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+                          </div>
+                        </div>
+                      } />
                     </Routes>
                   </Suspense>
                 </div>

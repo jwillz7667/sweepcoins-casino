@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins } from "lucide-react";
 
-const Auth = () => {
+const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -98,4 +98,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default AuthPage;
