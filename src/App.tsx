@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Web3Provider } from "@/contexts/Web3Context";
+import { SecurityProvider } from "@/contexts/SecurityContext";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Suspense, lazy } from "react";
@@ -52,77 +53,79 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Router>
-          <AuthProvider>
-            <Web3Provider>
-              <div className="min-h-screen flex flex-col bg-background text-foreground">
-                <Navbar />
-                <div className="flex-grow">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      {/* Public Routes */}
-                      <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<AuthPage />} />
+        <SecurityProvider>
+          <Router>
+            <AuthProvider>
+              <Web3Provider>
+                <div className="min-h-screen flex flex-col bg-background text-foreground">
+                  <Navbar />
+                  <div className="flex-grow">
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Routes>
+                        {/* Public Routes */}
+                        <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<AuthPage />} />
 
-                      {/* Protected Routes */}
-                      <Route path="/dashboard" element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/purchase" element={
-                        <ProtectedRoute>
-                          <Purchase />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/purchase/success" element={
-                        <ProtectedRoute>
-                          <PurchaseSuccess />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/games" element={
-                        <ProtectedRoute>
-                          <Games />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/promotions" element={
-                        <ProtectedRoute>
-                          <Promotions />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/vip" element={
-                        <ProtectedRoute>
-                          <VIPProgram />
-                        </ProtectedRoute>
-                      } />
+                        {/* Protected Routes */}
+                        <Route path="/dashboard" element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/purchase" element={
+                          <ProtectedRoute>
+                            <Purchase />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/purchase/success" element={
+                          <ProtectedRoute>
+                            <PurchaseSuccess />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/games" element={
+                          <ProtectedRoute>
+                            <Games />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/promotions" element={
+                          <ProtectedRoute>
+                            <Promotions />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/vip" element={
+                          <ProtectedRoute>
+                            <VIPProgram />
+                          </ProtectedRoute>
+                        } />
 
-                      {/* Public Information Routes */}
-                      <Route path="/about" element={<About />} />
-                      <Route path="/faq" element={<FAQ />} />
-                      <Route path="/support" element={<Support />} />
-                      <Route path="/terms" element={<TermsAndConditions />} />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route path="/kyc" element={<KYCPolicy />} />
-                      <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
+                        {/* Public Information Routes */}
+                        <Route path="/about" element={<About />} />
+                        <Route path="/faq" element={<FAQ />} />
+                        <Route path="/support" element={<Support />} />
+                        <Route path="/terms" element={<TermsAndConditions />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/kyc" element={<KYCPolicy />} />
+                        <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
 
-                      {/* Catch-all route for 404s */}
-                      <Route path="*" element={
-                        <div className="min-h-screen flex items-center justify-center">
-                          <div className="text-center">
-                            <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
-                            <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+                        {/* Catch-all route for 404s */}
+                        <Route path="*" element={
+                          <div className="min-h-screen flex items-center justify-center">
+                            <div className="text-center">
+                              <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+                              <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+                            </div>
                           </div>
-                        </div>
-                      } />
-                    </Routes>
-                  </Suspense>
+                        } />
+                      </Routes>
+                    </Suspense>
+                  </div>
+                  <Footer />
                 </div>
-                <Footer />
-              </div>
-              <Toaster />
-            </Web3Provider>
-          </AuthProvider>
-        </Router>
+                <Toaster />
+              </Web3Provider>
+            </AuthProvider>
+          </Router>
+        </SecurityProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

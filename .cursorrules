@@ -303,6 +303,13 @@ git:
       - release
       - docs
 
+  workflow:
+    push_rules:
+      - Never push changes to git unless explicitly instructed by the user
+      - Wait for user confirmation before any git push operations
+      - Document all changes that would need to be pushed
+      - Provide clear explanation of what will be pushed before requesting permission
+
 # Security Rules
 security:
   practices:

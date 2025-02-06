@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { btcPayService, BTCPayInvoice, CreateInvoiceParams } from '@/lib/btcpay';
+import { btcPayService } from '@/lib/btcpay';
+import { BTCPayInvoice, BTCPayInvoiceRequest } from '@/types/btcpay';
 import { useAuth } from './use-auth';
 import { toast } from 'sonner';
 
@@ -8,7 +9,7 @@ export const useBTCPay = () => {
   const [currentInvoice, setCurrentInvoice] = useState<BTCPayInvoice | null>(null);
   const { user } = useAuth();
 
-  const createInvoice = async (params: Omit<CreateInvoiceParams, 'redirectURL' | 'buyerEmail'>) => {
+  const createInvoice = async (params: Omit<BTCPayInvoiceRequest, 'redirectURL'>) => {
     if (!user) {
       toast.error('Please sign in to make a purchase');
       return null;
@@ -18,7 +19,6 @@ export const useBTCPay = () => {
     try {
       const invoice = await btcPayService.createInvoice({
         ...params,
-        buyerEmail: user.email,
         redirectURL: `${window.location.origin}/purchase/success`,
       });
       

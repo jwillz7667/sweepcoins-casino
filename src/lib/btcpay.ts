@@ -1,32 +1,12 @@
 import axios, { AxiosError } from 'axios';
+import { 
+  BTCPayInvoice, 
+  BTCPayInvoiceRequest,
+  BTCPayServiceInterface,
+  BTCPayWebhookDelivery
+} from '@/types/btcpay';
 
-export type BTCPayInvoice = {
-  id: string;
-  status: 'New' | 'Processing' | 'Settled' | 'Expired';
-  checkoutLink: string;
-  amount: number;
-  currency: string;
-  orderId: string;
-  createdAt: string;
-};
-
-export interface BTCPayMetadata {
-  packageId?: number;
-  coins?: number;
-  buyerEmail?: string;
-  [key: string]: string | number | undefined;
-}
-
-export type CreateInvoiceParams = {
-  price: number;
-  currency: string;
-  orderId: string;
-  buyerEmail?: string;
-  redirectURL: string;
-  metadata?: BTCPayMetadata;
-};
-
-class BTCPayService {
+export class BTCPayService implements BTCPayServiceInterface {
   private readonly apiKey: string;
   private readonly serverUrl: string;
   private readonly storeId: string;
@@ -51,11 +31,15 @@ class BTCPayService {
     });
   }
 
-  async createInvoice(params: CreateInvoiceParams): Promise<BTCPayInvoice> {
+  async createInvoice(params: BTCPayInvoiceRequest): Promise<BTCPayInvoice> {
     try {
       console.log('Creating BTCPay invoice with params:', {
         ...params,
-        buyerEmail: params.buyerEmail ? '***' : undefined // Hide email in logs
+        metadata: {
+          ...params.metadata,
+          packageId: params.metadata.packageId ? '***' : undefined,
+          coins: params.metadata.coins ? '***' : undefined
+        }
       });
 
       const response = await this.axiosInstance.post(
@@ -63,8 +47,6 @@ class BTCPayService {
         {
           amount: params.price,
           currency: params.currency,
-          orderId: params.orderId,
-          redirectURL: params.redirectURL,
           metadata: params.metadata,
           checkout: {
             redirectURL: params.redirectURL,
@@ -76,16 +58,15 @@ class BTCPayService {
         }
       );
 
-      console.log('BTCPay invoice created successfully:', response.data.id);
-      
       return {
         id: response.data.id,
         status: response.data.status,
         checkoutLink: response.data.checkoutLink,
         amount: response.data.amount,
         currency: response.data.currency,
-        orderId: response.data.orderId,
+        metadata: response.data.metadata,
         createdAt: response.data.createdTime,
+        expiresAt: response.data.expirationTime,
       };
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -122,8 +103,9 @@ class BTCPayService {
         checkoutLink: response.data.checkoutLink,
         amount: response.data.amount,
         currency: response.data.currency,
-        orderId: response.data.orderId,
+        metadata: response.data.metadata,
         createdAt: response.data.createdTime,
+        expiresAt: response.data.expirationTime,
       };
     } catch (error) {
       console.error('BTCPay getInvoice error:', error);
@@ -131,7 +113,7 @@ class BTCPayService {
     }
   }
 
-  async getWebhookDeliveries(webhookId: string) {
+  async getWebhookDeliveries(webhookId: string): Promise<BTCPayWebhookDelivery[]> {
     try {
       const response = await this.axiosInstance.get(
         `/api/v1/stores/${this.storeId}/webhooks/${webhookId}/deliveries`

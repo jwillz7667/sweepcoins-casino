@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError, User } from "@supabase/supabase-js";
+import React from "react";
 
 interface AuthUser {
   id: string;
@@ -67,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
         username: profile.username || '',
-        sweepcoins: profile.sweepcoins,
+        sweepcoins: profile.sweepcoins ?? 0,
       });
     }
   }, []);
@@ -90,13 +91,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               id: session.user.id,
               email: session.user.email || '',
               username: profile.username || '',
-              sweepcoins: profile.sweepcoins,
+              sweepcoins: profile.sweepcoins ?? 0,
             });
             console.log('User state initialized:', {
               id: session.user.id,
               email: session.user.email,
               username: profile.username,
-              sweepcoins: profile.sweepcoins,
+              sweepcoins: profile.sweepcoins ?? 0,
             });
           }
         } else {
@@ -154,14 +155,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           id: data.session.user.id,
           email: data.session.user.email || '',
           username: profile.username || '',
-          sweepcoins: profile.sweepcoins,
+          sweepcoins: profile.sweepcoins ?? 0,
         });
 
         console.log('User state updated:', {
           id: data.session.user.id,
           email: data.session.user.email,
           username: profile.username,
-          sweepcoins: profile.sweepcoins,
+          sweepcoins: profile.sweepcoins ?? 0,
         });
 
         // Show success message and navigate after state is updated
@@ -215,6 +216,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {loading ? <LoadingSpinner /> : children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
 
 export { AuthContext };
