@@ -17,7 +17,7 @@ interface PaymentDialogProps {
   onBTCPurchase: () => Promise<{ success: boolean; error?: Error }>;
 }
 
-export function PaymentDialog({
+export const PaymentDialog = ({
   isOpen,
   onClose,
   selectedPackage,
@@ -27,19 +27,19 @@ export function PaymentDialog({
   currentInvoice,
   onETHPurchase,
   onBTCPurchase,
-}: PaymentDialogProps) {
+}: PaymentDialogProps) => {
   if (!selectedPackage) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Purchase {selectedPackage.coins.toLocaleString()} Coins</DialogTitle>
+          <DialogTitle>Choose Payment Method</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="eth" onValueChange={onPaymentMethodChange}>
+        <Tabs defaultValue="eth" onValueChange={(value) => onPaymentMethodChange(value as 'eth' | 'btc')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="eth">ETH</TabsTrigger>
-            <TabsTrigger value="btc">BTC</TabsTrigger>
+            <TabsTrigger value="eth">Ethereum</TabsTrigger>
+            <TabsTrigger value="btc">Bitcoin</TabsTrigger>
           </TabsList>
           <TabsContent value="eth">
             <div className="space-y-4">
@@ -87,4 +87,4 @@ export function PaymentDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}; 

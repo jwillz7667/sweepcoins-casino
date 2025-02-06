@@ -6,15 +6,10 @@ import { performanceMonitor } from '@/lib/performance';
 vi.mock('@/lib/performance', () => ({
   performanceMonitor: {
     startTrace: vi.fn(() => 'test-trace-id'),
-    endTrace: vi.fn(() => ({
-      id: 'test-trace-id',
-      name: 'test-trace',
-      duration: 100,
-      tags: {},
-    })),
+    endTrace: vi.fn(),
     recordMetric: vi.fn(),
-    measureAsyncOperation: vi.fn((name, operation) => operation()),
-    measureSyncOperation: vi.fn((name, operation) => operation()),
+    measureAsyncOperation: vi.fn(async (_, operation) => operation()),
+    measureSyncOperation: vi.fn((_, operation) => operation()),
   },
 }));
 

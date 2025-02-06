@@ -5,6 +5,9 @@ import { renderWithProviders, mockPackage, mockBTCPayInvoice, mockToast, createM
 import { errorTracking } from '@/lib/error-tracking';
 import { performanceMonitor } from '@/lib/performance';
 import { usePurchaseStore } from '@/store';
+import { mockBTCPayContext } from '@/test/utils';
+import { useApi } from '@/hooks/use-api';
+import { useBTCPay } from '@/hooks/use-btcpay';
 
 // Mock dependencies
 vi.mock('@/lib/error-tracking', () => ({
@@ -50,7 +53,11 @@ vi.mock('@/hooks/use-btcpay', () => ({
 }));
 
 vi.mock('@/hooks/use-api', () => ({
-  useApi: () => createMockApi(),
+  useApi: vi.fn(),
+}));
+
+vi.mock('@/hooks/use-btcpay', () => ({
+  useBTCPay: vi.fn(),
 }));
 
 describe('PurchaseOptions', () => {
@@ -62,6 +69,10 @@ describe('PurchaseOptions', () => {
       isProcessing: false,
       activeInvoiceId: null,
     });
+    (useApi as any).mockReturnValue({
+      post: vi.fn().mockResolvedValue({ id: 'test-intent' }),
+    });
+    (useBTCPay as any).mockReturnValue(mockBTCPayContext);
   });
 
   it('renders package cards correctly', () => {

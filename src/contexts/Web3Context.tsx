@@ -1,5 +1,5 @@
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, ReactNode } from "react";
-import { ethers, BrowserProvider, parseEther } from "ethers";
+import { BrowserProvider, parseEther } from "ethers";
 import Web3Modal from "web3modal";
 import { toast } from "sonner";
 import { useWeb3Store } from "@/store";
@@ -17,7 +17,7 @@ interface Web3ProviderProps {
 }
 
 export const Web3Provider = ({ children }: Web3ProviderProps) => {
-  const { account, chainId, isConnecting, setAccount, setChainId, setIsConnecting, resetWeb3State } = useWeb3Store();
+  const { account, isConnecting, setAccount, setChainId, setIsConnecting, resetWeb3State } = useWeb3Store();
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   const web3Modal = useMemo(

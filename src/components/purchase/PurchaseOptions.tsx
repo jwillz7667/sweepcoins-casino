@@ -1,9 +1,9 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { toast } from "sonner";
 import { useWeb3 } from "@/hooks/use-web3";
 import { useBTCPay } from "@/hooks/use-btcpay";
 import { useApi } from '@/hooks/use-api';
-import { Package, packages } from './packages.data';
+import { packages } from './packages.data';
 import { PaymentDialog } from './PaymentDialog';
 import { PackageCard } from './PurchaseCard';
 import { usePurchaseStore } from '@/store';

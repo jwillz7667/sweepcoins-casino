@@ -138,6 +138,98 @@ export const mockToast = {
   warning: vi.fn(),
 };
 
+export const mockBTCPayContext: BTCPayContextType = {
+  createInvoice: vi.fn().mockResolvedValue({
+    id: 'mock-id',
+    checkoutLink: 'mock-link',
+    status: 'New',
+    amount: '0.001',
+    currency: 'BTC',
+    metadata: { packageId: 1, coins: 1000 },
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+  }),
+  checkInvoiceStatus: vi.fn().mockResolvedValue({
+    id: 'mock-id',
+    checkoutLink: 'mock-link',
+    status: 'New',
+    amount: '0.001',
+    currency: 'BTC',
+    metadata: { packageId: 1, coins: 1000 },
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+  }),
+  currentInvoice: null,
+  isLoading: false,
+};
+
+export const mockAppContext: AppContextType = {
+  error: null,
+  setError: vi.fn(),
+  clearError: vi.fn(),
+};
+
+export const mockPurchaseContext: PurchaseContextType = {
+  selectedPackage: null,
+  paymentMethod: 'eth',
+  isProcessing: false,
+  activeInvoiceId: null,
+  setSelectedPackage: vi.fn(),
+  setPaymentMethod: vi.fn(),
+  setIsProcessing: vi.fn(),
+  setActiveInvoiceId: vi.fn(),
+  resetPurchaseState: vi.fn(),
+};
+
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  initialState?: Partial<{
+    web3: {
+      account: string | null;
+      chainId: number | null;
+      isConnecting: boolean;
+    };
+    app: {
+      error: Error | null;
+    };
+    purchase: {
+      selectedPackage: Package | null;
+      paymentMethod: 'eth' | 'btc';
+      isProcessing: boolean;
+      activeInvoiceId: string | null;
+    };
+  }>;
+}
+
+const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: CustomRenderOptions['initialState'] }> = ({
+  children,
+  initialState = {},
+}) => {
+  return (
+    <ErrorBoundary>
+      <AppProvider value={mockAppContext}>
+        <Web3Provider>
+          <BTCPayProvider value={mockBTCPayContext}>
+            <PurchaseProvider value={mockPurchaseContext}>
+              {children}
+            </PurchaseProvider>
+          </BTCPayProvider>
+        </Web3Provider>
+      </AppProvider>
+    </ErrorBoundary>
+  );
+};
+
+export const renderWithProviders = (
+  ui: React.ReactElement,
+  options: CustomRenderOptions = {}
+) => {
+  const { initialState, ...renderOptions } = options;
+  return render(ui, {
+    wrapper: (props) => <AllTheProviders {...props} initialState={initialState} />,
+    ...renderOptions,
+  });
+};
+
 /**
  * Custom renderer that wraps the UI with all necessary providers
  */

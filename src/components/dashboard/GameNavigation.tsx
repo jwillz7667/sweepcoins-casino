@@ -1,6 +1,7 @@
+import React from 'react';
 import { Layout, Heart, Flame, Crown, Joystick, Grid } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const GameNavigation = () => {
   const location = useLocation();
