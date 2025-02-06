@@ -1,23 +1,16 @@
 import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render as baseRender, RenderOptions } from '@testing-library/react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
-import { Web3Provider } from '@/contexts/Web3Context';
+import { Web3Context } from '@/contexts/Web3Context';
 import { BTCPayProvider } from '@/contexts/BTCPayContext';
 import { AppProvider } from '@/contexts/AppContext';
 import { PurchaseProvider } from '@/contexts/PurchaseContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import type { BTCPayMetadata, BTCPayContextType } from '@/contexts/BTCPayContext';
+import type { BTCPayContextType } from '@/contexts/BTCPayContext';
 import type { AppContextType } from '@/contexts/AppContext';
 import type { PurchaseContextType } from '@/contexts/PurchaseContext';
 import type { Package, BTCPayInvoice } from '@/types';
-
-type CreateInvoiceParams = {
-  price: number;
-  currency: string;
-  orderId: string;
-  metadata: BTCPayMetadata;
-};
 
 interface TestContextState {
   web3?: {
@@ -51,15 +44,16 @@ export const mockPackage = {
 
 export const mockWeb3Provider = {
   account: '0x123',
-  connectWallet: vi.fn(),
-  sendTransaction: vi.fn(),
+  chainId: 1,
   isConnecting: false,
-  disconnect: vi.fn(),
+  connectWallet: vi.fn(),
+  disconnectWallet: vi.fn(),
+  sendTransaction: vi.fn(),
 };
 
 export const mockBTCPayProvider: BTCPayContextType = {
-  createInvoice: vi.fn().mockImplementation(async (params: CreateInvoiceParams) => ({} as BTCPayInvoice)),
-  checkInvoiceStatus: vi.fn().mockImplementation(async (invoiceId: string) => ({} as BTCPayInvoice)),
+  createInvoice: vi.fn().mockImplementation(async () => ({} as BTCPayInvoice)),
+  checkInvoiceStatus: vi.fn().mockImplementation(async () => ({} as BTCPayInvoice)),
   currentInvoice: null,
   isLoading: false,
 };
@@ -82,20 +76,6 @@ export const mockPurchaseProvider: PurchaseContextType = {
   resetPurchaseState: vi.fn(),
 };
 
-const defaultBTCPayInvoice: BTCPayInvoice = {
-  id: 'test-invoice',
-  checkoutLink: 'https://test.com/invoice',
-  status: 'New',
-  amount: '0.005',
-  currency: 'BTC',
-  metadata: {
-    packageId: 1,
-    coins: 1000,
-  },
-  createdAt: new Date().toISOString(),
-  expiresAt: new Date(Date.now() + 3600000).toISOString(),
-};
-
 export function createMockStore() {
   const store = {
     getState: vi.fn(),
@@ -110,8 +90,8 @@ export const mockPerformanceMetrics = {
   startTrace: vi.fn(() => 'test-trace-id'),
   endTrace: vi.fn(),
   recordMetric: vi.fn(),
-  measureAsyncOperation: vi.fn((name, operation) => operation()),
-  measureSyncOperation: vi.fn((name, operation) => operation()),
+  measureAsyncOperation: vi.fn((operation) => operation()),
+  measureSyncOperation: vi.fn((operation) => operation()),
 };
 
 export const mockErrorTracking = {
@@ -138,116 +118,23 @@ export const mockToast = {
   warning: vi.fn(),
 };
 
-export const mockBTCPayContext: BTCPayContextType = {
-  createInvoice: vi.fn().mockResolvedValue({
-    id: 'mock-id',
-    checkoutLink: 'mock-link',
-    status: 'New',
-    amount: '0.001',
-    currency: 'BTC',
-    metadata: { packageId: 1, coins: 1000 },
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 3600000).toISOString(),
-  }),
-  checkInvoiceStatus: vi.fn().mockResolvedValue({
-    id: 'mock-id',
-    checkoutLink: 'mock-link',
-    status: 'New',
-    amount: '0.001',
-    currency: 'BTC',
-    metadata: { packageId: 1, coins: 1000 },
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 3600000).toISOString(),
-  }),
-  currentInvoice: null,
-  isLoading: false,
-};
-
-export const mockAppContext: AppContextType = {
-  error: null,
-  setError: vi.fn(),
-  clearError: vi.fn(),
-};
-
-export const mockPurchaseContext: PurchaseContextType = {
-  selectedPackage: null,
-  paymentMethod: 'eth',
-  isProcessing: false,
-  activeInvoiceId: null,
-  setSelectedPackage: vi.fn(),
-  setPaymentMethod: vi.fn(),
-  setIsProcessing: vi.fn(),
-  setActiveInvoiceId: vi.fn(),
-  resetPurchaseState: vi.fn(),
-};
-
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  initialState?: Partial<{
-    web3: {
-      account: string | null;
-      chainId: number | null;
-      isConnecting: boolean;
-    };
-    app: {
-      error: Error | null;
-    };
-    purchase: {
-      selectedPackage: Package | null;
-      paymentMethod: 'eth' | 'btc';
-      isProcessing: boolean;
-      activeInvoiceId: string | null;
-    };
-  }>;
+interface CustomRenderOptions {
+  state?: TestContextState;
+  initialState?: TestContextState;
+  wrapper?: React.ComponentType;
 }
 
-const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: CustomRenderOptions['initialState'] }> = ({
-  children,
-  initialState = {},
-}) => {
-  return (
-    <ErrorBoundary>
-      <AppProvider value={mockAppContext}>
-        <Web3Provider>
-          <BTCPayProvider value={mockBTCPayContext}>
-            <PurchaseProvider value={mockPurchaseContext}>
-              {children}
-            </PurchaseProvider>
-          </BTCPayProvider>
-        </Web3Provider>
-      </AppProvider>
-    </ErrorBoundary>
-  );
-};
-
-export const renderWithProviders = (
-  ui: React.ReactElement,
-  options: CustomRenderOptions = {}
-) => {
-  const { initialState, ...renderOptions } = options;
-  return render(ui, {
-    wrapper: (props) => <AllTheProviders {...props} initialState={initialState} />,
-    ...renderOptions,
-  });
-};
-
-/**
- * Custom renderer that wraps the UI with all necessary providers
- */
-const AllProviders = ({ children, state = {} }: ProvidersProps) => {
-  // Create context values based on initial state
+const TestProviders = ({ children, state = {} }: ProvidersProps) => {
   const web3Value = {
-    account: state.web3?.account ?? null,
-    chainId: state.web3?.chainId ?? null,
-    isConnecting: state.web3?.isConnecting ?? false,
     connectWallet: async () => {},
     disconnectWallet: async () => {},
-    sendTransaction: async () => ({ success: false })
+    sendTransaction: async () => ({ success: false }),
   };
 
   const appValue = {
     error: state.app?.error ?? null,
-    setError: () => {},
-    clearError: () => {}
+    setError: vi.fn(),
+    clearError: vi.fn(),
   };
 
   const purchaseValue = {
@@ -255,57 +142,79 @@ const AllProviders = ({ children, state = {} }: ProvidersProps) => {
     paymentMethod: state.purchase?.paymentMethod ?? 'eth',
     isProcessing: state.purchase?.isProcessing ?? false,
     activeInvoiceId: state.purchase?.activeInvoiceId ?? null,
-    setSelectedPackage: () => {},
-    setPaymentMethod: () => {},
-    setIsProcessing: () => {},
-    setActiveInvoiceId: () => {},
-    resetPurchaseState: () => {}
-  };
-
-  const btcPayValue = {
-    createInvoice: async () => defaultBTCPayInvoice,
-    checkInvoiceStatus: async () => defaultBTCPayInvoice,
-    currentInvoice: null,
-    isLoading: false
+    setSelectedPackage: vi.fn(),
+    setPaymentMethod: vi.fn(),
+    setIsProcessing: vi.fn(),
+    setActiveInvoiceId: vi.fn(),
+    resetPurchaseState: vi.fn(),
   };
 
   return (
     <ErrorBoundary>
       <AppProvider value={appValue}>
-        <Web3Provider value={web3Value}>
-          <BTCPayProvider value={btcPayValue}>
+        <Web3Context.Provider value={web3Value}>
+          <BTCPayProvider value={mockBTCPayProvider}>
             <PurchaseProvider value={purchaseValue}>
               {children}
             </PurchaseProvider>
           </BTCPayProvider>
-        </Web3Provider>
+        </Web3Context.Provider>
       </AppProvider>
     </ErrorBoundary>
   );
 };
 
-/**
- * Custom render method that includes all providers
- */
-const customRender = (
+const render = (
   ui: React.ReactElement,
-  {
-    state,
-    ...renderOptions
-  }: Partial<ProvidersProps> & Omit<RenderOptions, 'wrapper'> = {}
+  options: CustomRenderOptions = {}
 ) => {
-  return render(ui, {
-    wrapper: (props) => (
-      <AllProviders {...props} state={state} />
-    ),
-    ...renderOptions
+  const { state, ...renderOptions } = options;
+  return baseRender(ui, {
+    wrapper: (props: ProvidersProps) => <TestProviders {...props} state={state} />,
+    ...renderOptions,
+  });
+};
+
+export { render as customRender };
+export * from '@testing-library/react';
+
+/**
+ * Custom renderer that wraps the UI with all necessary providers
+ */
+const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: CustomRenderOptions['initialState'] }> = ({
+  children,
+  initialState = {},
+}) => {
+  return (
+    <ErrorBoundary>
+      <AppProvider value={mockAppProvider}>
+        <Web3Context.Provider value={mockWeb3Provider}>
+          <BTCPayProvider value={mockBTCPayProvider}>
+            <PurchaseProvider value={mockPurchaseProvider}>
+              {children}
+            </PurchaseProvider>
+          </BTCPayProvider>
+        </Web3Context.Provider>
+      </AppProvider>
+    </ErrorBoundary>
+  );
+};
+
+const renderWithProviders = (
+  ui: React.ReactElement,
+  options: CustomRenderOptions & Omit<RenderOptions, 'wrapper'> = {}
+) => {
+  const { initialState, ...renderOptions } = options;
+  return baseRender(ui, {
+    wrapper: (props: { children: React.ReactNode }) => <AllTheProviders {...props} initialState={initialState} />,
+    ...renderOptions,
   });
 };
 
 /**
  * Basic test wrapper with error boundary
  */
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <ErrorBoundary>
     {children}
   </ErrorBoundary>
@@ -317,10 +226,4 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 const customRender = (
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: TestWrapper, ...options });
-
-// Re-export everything
-export * from '@testing-library/react';
-
-// Override render method
-export { customRender as render }; 
+) => render(ui, { wrapper: TestWrapper, ...options }); 
