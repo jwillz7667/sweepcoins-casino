@@ -43,9 +43,10 @@ export function useAsync<T>(
         });
 
         options.onSuccess?.(data);
-        return { success: true, data };
-      } catch (error) {
-        const trackedError = errorTracking.captureError(error, {
+        return { success: true as const, data };
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        errorTracking.captureError(error, {
           action: asyncFunction.name,
           ...options.errorMetadata,
         });
@@ -53,11 +54,11 @@ export function useAsync<T>(
         setState({
           data: null,
           isLoading: false,
-          error: trackedError,
+          error,
         });
 
-        options.onError?.(trackedError);
-        return { success: false, error: trackedError };
+        options.onError?.(error);
+        return { success: false as const, error };
       }
     },
     [asyncFunction, options]
@@ -78,7 +79,7 @@ export function useAsync<T>(
   };
 }
 
-export function useAsyncCallback<T = { success: boolean; error?: Error }>(
+export function useAsyncCallback<T>(
   asyncFunction: AsyncFunction<T>,
   options: UseAsyncOptions<T> = {}
 ) {
@@ -93,16 +94,17 @@ export function useAsyncCallback<T = { success: boolean; error?: Error }>(
 
         const result = await asyncFunction(...args);
         options.onSuccess?.(result);
-        return result;
-      } catch (error) {
-        const trackedError = errorTracking.captureError(error, {
+        return { success: true as const, data: result };
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        errorTracking.captureError(error, {
           action: asyncFunction.name,
           ...options.errorMetadata,
         });
 
-        setError(trackedError);
-        options.onError?.(trackedError);
-        return { success: false, error: trackedError } as T;
+        setError(error);
+        options.onError?.(error);
+        return { success: false as const, error };
       } finally {
         setIsLoading(false);
       }
@@ -130,7 +132,8 @@ export function withErrorBoundary<T extends AsyncFunction<unknown>>(
   return (async (...args: Parameters<T>) => {
     try {
       return await asyncFunction(...args);
-    } catch (error) {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
       errorTracking.captureError(error, metadata);
       throw error;
     }

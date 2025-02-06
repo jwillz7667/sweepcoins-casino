@@ -8,7 +8,7 @@ interface GameCardProps {
   image?: string;
   locked?: boolean;
   className?: string;
-  volatility?: "low" | "medium" | "high";
+  volatility?: "Low" | "Medium" | "High";
   rtp?: number;
   gameplay?: string;
 }
@@ -19,7 +19,7 @@ export const GameCard = ({
   image, 
   locked = false, 
   className,
-  volatility = "medium",
+  volatility = "Medium",
   rtp = 96.5,
   gameplay = "/placeholder.svg"
 }: GameCardProps) => {
@@ -29,7 +29,6 @@ export const GameCard = ({
         <div>
           <GameThumbnail
             title={title}
-            description={description}
             image={image}
             locked={locked}
             className={className}

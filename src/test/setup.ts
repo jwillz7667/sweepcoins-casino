@@ -1,12 +1,11 @@
 import '@testing-library/jest-dom';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { errorTracking } from '@/lib/error-tracking';
 import { performanceMonitor } from '@/lib/performance';
-import { vi } from 'vitest';
 
 // Initialize services with test configuration
-errorTracking.initialize({ environment: 'test' });
+errorTracking.initialize();
 performanceMonitor.initialize();
 
 // Mock window.crypto for UUID generation
@@ -31,13 +30,9 @@ Object.defineProperty(global, 'performance', {
 
 // Mock PerformanceObserver
 class MockPerformanceObserver {
-  constructor(callback: any) {
-    this.callback = callback;
-  }
   observe() {}
   disconnect() {}
   takeRecords() { return []; }
-  private callback: any;
 }
 
 Object.defineProperty(global, 'PerformanceObserver', {

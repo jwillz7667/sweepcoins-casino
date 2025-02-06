@@ -1,5 +1,3 @@
-import React from 'react';
-import { FC } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { faqs, categories } from "@/data/faq-data";
 
-export const FAQ = () => {
+const FAQ = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col items-center mb-12">
@@ -63,4 +61,6 @@ export const FAQ = () => {
       </div>
     </div>
   );
-} 
+};
+
+export default FAQ; 

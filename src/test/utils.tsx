@@ -51,9 +51,23 @@ export const mockWeb3Provider = {
   sendTransaction: vi.fn(),
 };
 
-export const mockBTCPayProvider: BTCPayContextType = {
-  createInvoice: vi.fn().mockImplementation(async () => ({} as BTCPayInvoice)),
-  checkInvoiceStatus: vi.fn().mockImplementation(async () => ({} as BTCPayInvoice)),
+export const mockBTCPayInvoice: BTCPayInvoice = {
+  id: 'test-invoice',
+  checkoutLink: 'https://test.com/invoice',
+  status: 'New',
+  amount: '0.005',
+  currency: 'BTC',
+  metadata: {
+    packageId: 1,
+    coins: 1000,
+  },
+  createdAt: new Date().toISOString(),
+  expiresAt: new Date(Date.now() + 3600000).toISOString(),
+};
+
+export const mockBTCPayContext = {
+  createInvoice: vi.fn().mockResolvedValue(mockBTCPayInvoice),
+  checkInvoiceStatus: vi.fn().mockResolvedValue(mockBTCPayInvoice),
   currentInvoice: null,
   isLoading: false,
 };
@@ -153,7 +167,7 @@ const TestProviders = ({ children, state = {} }: ProvidersProps) => {
     <ErrorBoundary>
       <AppProvider value={appValue}>
         <Web3Context.Provider value={web3Value}>
-          <BTCPayProvider value={mockBTCPayProvider}>
+          <BTCPayProvider value={mockBTCPayContext}>
             <PurchaseProvider value={purchaseValue}>
               {children}
             </PurchaseProvider>
@@ -189,7 +203,7 @@ const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: Cust
     <ErrorBoundary>
       <AppProvider value={mockAppProvider}>
         <Web3Context.Provider value={mockWeb3Provider}>
-          <BTCPayProvider value={mockBTCPayProvider}>
+          <BTCPayProvider value={mockBTCPayContext}>
             <PurchaseProvider value={mockPurchaseProvider}>
               {children}
             </PurchaseProvider>
@@ -226,4 +240,6 @@ const TestWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
 const customRender = (
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: TestWrapper, ...options }); 
+) => render(ui, { wrapper: TestWrapper, ...options });
+
+export { renderWithProviders }; 
