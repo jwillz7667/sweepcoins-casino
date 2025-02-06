@@ -96,7 +96,7 @@ These rules are designed specifically for our Next.js project built with modern 
 - Use Chain of Thought reasoning to solve problems.
 - Maintain consistency in component naming and file organization to streamline collaboration.
 - Update environment variables securely and keep sensitive configurations (e.g., Supabase credentials) out of the codebase.
-- Follow modernization trends by leveraging React’s latest features and Next.js improvements.
+- Follow modernization trends by leveraging React's latest features and Next.js improvements.
 - Ensure that any new features or refactors align with the overall project architecture and established .cursorrules.
 - Review the codebase and documentation periodically to adapt and expand these rules as project requirements evolve.
 
@@ -106,3 +106,233 @@ Notes:
 - This file is a living document and should be updated as new libraries are added or best practices evolve.
 - The AI coding assistant should use these instructions as a foundation when generating, refactoring, or reviewing code.
 - Always reference the latest project README, Tailwind configuration, and component standards when in doubt.
+
+# SweepCoins Casino - Cursor Rules Configuration
+# This file defines coding standards and best practices for the SweepCoins Casino project.
+
+# Project Structure Rules
+structure:
+  root_directories:
+    - app/         # Next.js App Router directory
+    - components/  # Reusable components
+    - contexts/    # React contexts
+    - hooks/       # Custom hooks
+    - lib/         # Utility functions and configurations
+    - styles/      # Global styles and theme configurations
+    - types/       # TypeScript type definitions
+    - public/      # Static assets
+
+  component_structure:
+    - components/ui/          # Shadcn UI components
+    - components/auth/        # Authentication related components
+    - components/layout/      # Layout components
+    - components/purchase/    # Purchase flow components
+    - components/web3/        # Web3 related components
+    - components/shared/      # Shared/common components
+
+# File Naming Conventions
+naming:
+  components:
+    pattern: "PascalCase.tsx"
+    examples:
+      - "PurchaseOptions.tsx"
+      - "WalletConnect.tsx"
+  
+  hooks:
+    pattern: "use-kebab-case.ts"
+    examples:
+      - "use-web3.ts"
+      - "use-btcpay.ts"
+  
+  contexts:
+    pattern: "PascalCaseContext.tsx"
+    examples:
+      - "AuthContext.tsx"
+      - "Web3Context.tsx"
+  
+  utilities:
+    pattern: "kebab-case.ts"
+    examples:
+      - "format-currency.ts"
+      - "wallet-utils.ts"
+
+# Component Rules
+components:
+  structure:
+    - imports
+    - types/interfaces
+    - component declaration
+    - hooks/state
+    - effects
+    - handlers
+    - render
+  
+  naming:
+    props_interface: "${ComponentName}Props"
+    handlers: "handle${EventName}"
+    
+  practices:
+    - Use functional components with hooks
+    - Implement proper TypeScript types
+    - Add JSDoc comments for complex logic
+    - Use early returns for conditional rendering
+    - Keep components focused and single-responsibility
+
+# State Management Rules
+state_management:
+  contexts:
+    - Prefer hooks over direct context usage
+    - Keep context providers at appropriate levels
+    - Split large contexts into smaller ones
+  
+  local_state:
+    - Use appropriate hook for state type
+    - Implement proper state initialization
+    - Handle loading and error states
+
+# Styling Rules
+styling:
+  practices:
+    - Use Tailwind classes for styling
+    - Follow mobile-first approach
+    - Use CSS variables for theming
+    - Implement proper dark mode support
+  
+  class_naming:
+    pattern: "lowercase-with-hyphens"
+    order:
+      - Layout
+      - Display
+      - Spacing
+      - Colors
+      - Typography
+      - States
+
+# TypeScript Rules
+typescript:
+  config:
+    strict: true
+    noImplicitAny: true
+    strictNullChecks: true
+  
+  practices:
+    - Define proper types for all props
+    - Use type inference when possible
+    - Avoid any type
+    - Use proper type imports/exports
+    - Implement proper error types
+
+# Web3 Integration Rules
+web3:
+  practices:
+    - Implement proper error handling
+    - Add transaction confirmation flows
+    - Handle wallet disconnections
+    - Support multiple networks
+    - Validate transactions
+  
+  security:
+    - Validate signatures
+    - Implement proper session management
+    - Handle gas estimation
+    - Protect sensitive operations
+
+# Testing Rules
+testing:
+  requirements:
+    - Unit tests for components
+    - Integration tests for flows
+    - E2E tests for critical paths
+    - Proper mocking of Web3 calls
+  
+  coverage:
+    minimum: 80%
+    critical_paths: 95%
+
+# Performance Rules
+performance:
+  practices:
+    - Implement proper code splitting
+    - Use React.memo for heavy components
+    - Optimize re-renders
+    - Implement proper loading states
+    - Use proper image optimization
+
+# Accessibility Rules
+accessibility:
+  requirements:
+    - Proper ARIA labels
+    - Keyboard navigation
+    - Screen reader support
+    - Color contrast compliance
+    - Focus management
+
+# Documentation Rules
+documentation:
+  component_docs:
+    - Purpose
+    - Props interface
+    - Usage examples
+    - Dependencies
+  
+  code_comments:
+    - Complex logic explanation
+    - TODO markers with JIRA tickets
+    - Security considerations
+    - Performance implications
+
+# Git Rules
+git:
+  commit_message:
+    format: "type(scope): description"
+    types:
+      - feat
+      - fix
+      - docs
+      - style
+      - refactor
+      - test
+      - chore
+    
+  branch_naming:
+    format: "type/description"
+    types:
+      - feature
+      - bugfix
+      - hotfix
+      - release
+      - docs
+
+# Security Rules
+security:
+  practices:
+    - Validate all user inputs
+    - Implement proper authentication
+    - Secure sensitive data
+    - Handle API errors
+    - Implement rate limiting
+
+# Error Handling Rules
+error_handling:
+  practices:
+    - Use proper error boundaries
+    - Implement proper error logging
+    - Show user-friendly messages
+    - Handle network errors
+    - Implement retry mechanisms
+
+# Code Quality Rules
+code_quality:
+  linting:
+    - ESLint with strict rules
+    - Prettier for formatting
+    - TypeScript strict mode
+    - Import sorting
+    - Unused code detection
+  
+  practices:
+    - Regular code reviews
+    - Pair programming
+    - Performance monitoring
+    - Security audits
+    - Dependency updates
