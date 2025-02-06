@@ -8,7 +8,7 @@ const Games: FC = () => {
       title: "Slots Paradise",
       description: "Experience the thrill of our most popular slot games",
       image: "/games/slots.jpg",
-      volatility: "high" as const,
+      volatility: "High" as const,
       rtp: 96.5,
     },
     {
@@ -16,7 +16,7 @@ const Games: FC = () => {
       title: "Blackjack Pro",
       description: "Classic blackjack with modern twists",
       image: "/games/blackjack.jpg",
-      volatility: "low" as const,
+      volatility: "Low" as const,
       rtp: 99.5,
     },
     {
@@ -24,7 +24,7 @@ const Games: FC = () => {
       title: "Roulette Royale",
       description: "European and American roulette variants",
       image: "/games/roulette.jpg",
-      volatility: "medium" as const,
+      volatility: "Medium" as const,
       rtp: 97.3,
     },
     {
@@ -32,7 +32,7 @@ const Games: FC = () => {
       title: "Poker Master",
       description: "Texas Hold'em and other popular variants",
       image: "/games/poker.jpg",
-      volatility: "medium" as const,
+      volatility: "Medium" as const,
       rtp: 98.2,
     },
     {
@@ -40,7 +40,7 @@ const Games: FC = () => {
       title: "Lucky Dice",
       description: "Fast-paced dice games with instant wins",
       image: "/games/dice.jpg",
-      volatility: "high" as const,
+      volatility: "High" as const,
       rtp: 95.8,
     },
     {
@@ -48,7 +48,7 @@ const Games: FC = () => {
       title: "Baccarat Elite",
       description: "High-stakes baccarat action",
       image: "/games/baccarat.jpg",
-      volatility: "low" as const,
+      volatility: "Low" as const,
       rtp: 98.9,
     },
   ];

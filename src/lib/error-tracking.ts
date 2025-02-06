@@ -23,13 +23,13 @@ class ErrorTracker {
     this.isInitialized = true;
   }
 
-  captureError(error: Error | unknown, metadata?: ErrorMetadata) {
+  captureError(error: Error | unknown, config?: ErrorConfig) {
     if (!this.isInitialized) {
       this.initialize();
     }
 
     console.error('Error captured:', error);
-    console.log('Error metadata:', metadata);
+    console.log('Error config:', config);
 
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
@@ -37,10 +37,12 @@ class ErrorTracker {
     }
 
     // Show user-friendly toast unless silent
-    if (error instanceof Error) {
-      toast.error(error.message);
-    } else {
-      toast.error('An unexpected error occurred');
+    if (!config?.silent) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     }
   }
 

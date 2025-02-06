@@ -21,8 +21,8 @@ vi.mock('@/lib/performance', () => ({
     startTrace: vi.fn(() => 'test-trace-id'),
     endTrace: vi.fn(),
     recordMetric: vi.fn(),
-    measureAsyncOperation: vi.fn((name, operation) => operation()),
-    measureSyncOperation: vi.fn((name, operation) => operation()),
+    measureAsyncOperation: vi.fn(async (operation) => operation()),
+    measureSyncOperation: vi.fn((operation) => operation()),
   },
 }));
 

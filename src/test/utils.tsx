@@ -195,9 +195,8 @@ export * from '@testing-library/react';
 /**
  * Custom renderer that wraps the UI with all necessary providers
  */
-const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: CustomRenderOptions['initialState'] }> = ({
-  children,
-  initialState = {},
+const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({
+  children
 }) => {
   return (
     <ErrorBoundary>
@@ -216,12 +215,11 @@ const AllTheProviders: React.FC<{ children: React.ReactNode; initialState?: Cust
 
 const renderWithProviders = (
   ui: React.ReactElement,
-  options: CustomRenderOptions & Omit<RenderOptions, 'wrapper'> = {}
+  options: Omit<RenderOptions, 'wrapper'> = {}
 ) => {
-  const { initialState, ...renderOptions } = options;
   return baseRender(ui, {
-    wrapper: (props: { children: React.ReactNode }) => <AllTheProviders {...props} initialState={initialState} />,
-    ...renderOptions,
+    wrapper: AllTheProviders,
+    ...options,
   });
 };
 
