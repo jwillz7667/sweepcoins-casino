@@ -11,6 +11,8 @@ interface ErrorMetadata {
   [key: string]: unknown;
 }
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 class ErrorTracker {
   private isInitialized = false;
 
@@ -23,13 +25,25 @@ class ErrorTracker {
     this.isInitialized = true;
   }
 
+  private log(...args: unknown[]) {
+    if (isDevelopment) {
+      console.log(...args);
+    }
+  }
+
+  private logError(...args: unknown[]) {
+    if (isDevelopment) {
+      console.error(...args);
+    }
+  }
+
   captureError(error: Error | unknown, config?: ErrorConfig) {
     if (!this.isInitialized) {
       this.initialize();
     }
 
-    console.error('Error captured:', error);
-    console.log('Error config:', config);
+    this.logError('Error captured:', error);
+    this.log('Error config:', config);
 
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
@@ -51,8 +65,8 @@ class ErrorTracker {
       this.initialize();
     }
 
-    console.log('Message captured:', message);
-    console.log('Message metadata:', metadata);
+    this.log('Message captured:', message);
+    this.log('Message metadata:', metadata);
 
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
@@ -65,7 +79,7 @@ class ErrorTracker {
       this.initialize();
     }
 
-    console.log('Setting user:', userId);
+    this.log('Setting user:', userId);
 
     // In production, set user in error tracking service
     if (process.env.NODE_ENV === 'production') {
@@ -78,7 +92,7 @@ class ErrorTracker {
       this.initialize();
     }
 
-    console.log('Clearing user');
+    this.log('Clearing user');
 
     // In production, clear user in error tracking service
     if (process.env.NODE_ENV === 'production') {

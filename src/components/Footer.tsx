@@ -1,9 +1,11 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { errorTracking } from "@/lib/error-tracking";
 import {
   FaDiscord,
   FaTwitter,
@@ -15,9 +17,38 @@ import {
 import { SiLitecoin, SiDogecoin } from "react-icons/si";
 
 const Footer: FC = () => {
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement newsletter subscription
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      // Call newsletter subscription API
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to subscribe to newsletter');
+      }
+
+      toast.success('Successfully subscribed to newsletter!');
+      setEmail('');
+    } catch (error) {
+      errorTracking.captureError(error, {
+        context: { component: 'Footer', action: 'newsletter_subscribe' }
+      });
+      toast.error('Failed to subscribe to newsletter. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,10 +154,13 @@ const Footer: FC = () => {
                 placeholder="Enter your email"
                 className="w-full"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 aria-label="Email for newsletter"
+                disabled={isSubmitting}
               />
-              <Button type="submit" className="w-full">
-                Subscribe
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
               </Button>
             </form>
           </div>

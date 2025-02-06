@@ -17,11 +17,15 @@ interface GameCarouselProps {
   games: Game[];
 }
 
-export const GameCarousel = ({ games }: GameCarouselProps) => {
+export const GameCarousel = ({ title, icon: Icon, games }: GameCarouselProps) => {
   const isMobile = useIsMobile();
 
   return (
     <div className="relative">
+      <div className="flex items-center gap-2 mb-4">
+        <Icon className="w-6 h-6" />
+        <h2 className="text-2xl font-semibold">{title}</h2>
+      </div>
       <Carousel
         opts={{
           align: "start",
