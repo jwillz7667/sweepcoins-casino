@@ -1,11 +1,6 @@
-import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { initializeSecurity, shouldRateLimit } from '@/lib/security';
-
-interface SecurityContextType {
-  checkRateLimit: (endpoint: string) => Promise<boolean>;
-}
-
-const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
+import { SecurityContext } from './security-context';
 
 export function SecurityProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -24,10 +19,4 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useSecurity() {
-  const context = useContext(SecurityContext);
-  if (context === undefined) {
-    throw new Error('useSecurity must be used within a SecurityProvider');
-  }
-  return context;
-} 
+export default SecurityProvider; 

@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import type { BTCPayContextType } from '@/contexts/btcpay-context';
 import type { AppContextType } from '@/contexts/app-context';
-import type { PurchaseContextType } from '@/contexts/PurchaseContext';
+import type { PurchaseContextType } from '@/contexts/purchase-context';
 import type { BTCPayInvoice } from '@/types';
 
 export const mockPackage = {

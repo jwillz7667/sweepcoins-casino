@@ -46,10 +46,7 @@ export function useAsync<T>(
         return { success: true as const, data };
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        errorTracking.captureError(error, {
-          action: asyncFunction.name,
-          ...options.errorMetadata,
-        });
+        errorTracking.captureError(error, options.errorMetadata || {});
 
         setState({
           data: null,
@@ -97,10 +94,7 @@ export function useAsyncCallback<T>(
         return { success: true as const, data: result };
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        errorTracking.captureError(error, {
-          action: asyncFunction.name,
-          ...options.errorMetadata,
-        });
+        errorTracking.captureError(error, options.errorMetadata || {});
 
         setError(error);
         options.onError?.(error);
@@ -134,7 +128,7 @@ export function withErrorBoundary<T extends AsyncFunction<unknown>>(
       return await asyncFunction(...args);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      errorTracking.captureError(error, metadata);
+      errorTracking.captureError(error, metadata || {});
       throw error;
     }
   }) as T;

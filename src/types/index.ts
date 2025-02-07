@@ -1,4 +1,4 @@
-import { BTCPayMetadata } from '@/contexts/BTCPayContext';
+import { BTCPayMetadata } from '@/contexts/btcpay-context';
 
 export interface Package {
   id: number;

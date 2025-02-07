@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { useSecurity } from '@/contexts/SecurityContext';
+import { useSecurity } from '@/contexts';
 import { toast } from 'sonner';
 
 interface UseApiOptions extends AxiosRequestConfig {

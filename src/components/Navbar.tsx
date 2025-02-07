@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SearchDialog } from "@/components/SearchDialog";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts";
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();

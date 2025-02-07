@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { Web3Provider } from "@/contexts/Web3Context";
-import { SecurityProvider } from "@/contexts/SecurityContext";
+import AuthProvider from "@/contexts/AuthContext";
+import Web3Provider from "@/contexts/Web3Context";
+import SecurityProvider from "@/contexts/SecurityContext";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Suspense, lazy } from "react";

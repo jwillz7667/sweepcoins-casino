@@ -1,11 +1,10 @@
 import React from 'react';
 import { vi } from 'vitest';
 import { Web3Context } from '@/contexts/web3-context';
-import { BTCPayProvider, AppProvider } from '@/contexts';
-import { PurchaseProvider } from '@/contexts/PurchaseContext';
+import { BTCPayProvider, AppProvider, PurchaseProvider } from '@/contexts';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import type { TestContextState } from './types';
-import { mockBTCPayContext, mockAppProvider, mockPurchaseProvider, mockWeb3Provider } from './mocks';
+import type { TestContextState } from './types.ts';
+import { mockBTCPayContext, mockAppProvider, mockPurchaseProvider, mockWeb3Provider } from './mocks.ts';
 
 interface ProvidersProps {
   children: React.ReactNode;
