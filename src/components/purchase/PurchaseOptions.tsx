@@ -98,10 +98,12 @@ export const PurchaseOptions = memo(() => {
       } catch (error) {
         performance.recordInteraction('eth_purchase_error');
         errorTracking.captureError(error, {
-          component: 'PurchaseOptions',
-          action: 'eth_purchase',
-          packageId: selectedPackage.id,
-          amount: selectedPackage.price,
+          context: {
+            component: 'PurchaseOptions',
+            action: 'eth_purchase',
+            packageId: selectedPackage.id,
+            amount: selectedPackage.price,
+          }
         });
         return { 
           success: false, 
@@ -181,11 +183,13 @@ export const PurchaseOptions = memo(() => {
         console.error('BTC purchase error:', error);
         performance.recordInteraction('btc_purchase_error');
         errorTracking.captureError(error, {
-          component: 'PurchaseOptions',
-          action: 'btc_purchase',
-          packageId: selectedPackage.id,
-          amount: selectedPackage.btcPrice,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          context: {
+            component: 'PurchaseOptions',
+            action: 'btc_purchase',
+            packageId: selectedPackage.id,
+            amount: selectedPackage.btcPrice,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }
         });
         return { 
           success: false, 
@@ -274,9 +278,11 @@ export const PurchaseOptions = memo(() => {
         }
       } catch (error) {
         errorTracking.captureError(error, {
-          component: 'PurchaseOptions',
-          action: 'check_btc_invoice',
-          invoiceId: activeInvoiceId,
+          context: {
+            component: 'PurchaseOptions',
+            action: 'check_btc_invoice',
+            invoiceId: activeInvoiceId,
+          }
         });
       } finally {
         performance.endInteraction(traceId);

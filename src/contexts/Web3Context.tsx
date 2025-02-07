@@ -1,22 +1,15 @@
-import { createContext, useContext, useCallback, useMemo, useState, useEffect, ReactNode } from "react";
+import { useCallback, useMemo, useState, useEffect, type ReactNode } from "react";
 import { BrowserProvider, parseEther } from "ethers";
 import Web3Modal from "web3modal";
 import { toast } from "sonner";
 import { useWeb3Store } from "@/store";
-
-interface Web3ContextType {
-  connectWallet: () => Promise<void>;
-  disconnectWallet: () => Promise<void>;
-  sendTransaction: (amount: number) => Promise<{ success: boolean; hash?: string }>;
-}
-
-const Web3Context = createContext<Web3ContextType | null>(null);
+import { Web3Context } from "./web3-context";
 
 interface Web3ProviderProps {
   children: ReactNode;
 }
 
-export const Web3Provider = ({ children }: Web3ProviderProps) => {
+const Web3Provider = ({ children }: Web3ProviderProps) => {
   const { account, isConnecting, setAccount, setChainId, setIsConnecting, resetWeb3State } = useWeb3Store();
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
@@ -132,20 +125,4 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
   );
 };
 
-export const useWeb3 = () => {
-  const context = useContext(Web3Context);
-  const { account, chainId, isConnecting } = useWeb3Store();
-  
-  if (!context) {
-    throw new Error("useWeb3 must be used within a Web3Provider");
-  }
-  
-  return {
-    ...context,
-    account,
-    chainId,
-    isConnecting,
-  };
-};
-
-export { Web3Context }; 
+export default Web3Provider; 

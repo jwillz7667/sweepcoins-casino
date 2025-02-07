@@ -1,33 +1,13 @@
-import { createContext, useContext } from 'react';
-import { BTCPayInvoice } from '@/types';
+import { type ReactNode } from 'react';
+import { BTCPayContext, type BTCPayContextType } from './btcpay-context';
 
-export interface BTCPayMetadata {
-  packageId: number;
-  coins: number;
-  intentId?: string;
-  [key: string]: number | string | undefined;
+interface BTCPayProviderProps {
+  children: ReactNode;
+  value: BTCPayContextType;
 }
 
-export interface BTCPayContextType {
-  createInvoice: (params: {
-    price: number;
-    currency: string;
-    orderId: string;
-    metadata: BTCPayMetadata;
-  }) => Promise<BTCPayInvoice>;
-  checkInvoiceStatus: (invoiceId: string) => Promise<BTCPayInvoice>;
-  currentInvoice: BTCPayInvoice | null;
-  isLoading: boolean;
-}
+const BTCPayProvider = ({ children, value }: BTCPayProviderProps) => {
+  return <BTCPayContext.Provider value={value}>{children}</BTCPayContext.Provider>;
+};
 
-export const BTCPayContext = createContext<BTCPayContextType | null>(null);
-
-export const BTCPayProvider = BTCPayContext.Provider;
-
-export const useBTCPay = () => {
-  const context = useContext(BTCPayContext);
-  if (!context) {
-    throw new Error('useBTCPay must be used within a BTCPayProvider');
-  }
-  return context;
-}; 
+export default BTCPayProvider; 

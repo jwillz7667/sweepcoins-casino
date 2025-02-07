@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { PurchaseOptions } from './PurchaseOptions';
-import { renderWithProviders, mockPackage, mockBTCPayInvoice, mockToast, createMockApi, mockBTCPayContext } from '@/test/utils';
+import { renderWithProviders } from '@/test/utils';
+import { mockPackage, mockToast, createMockApi, mockBTCPayContext } from '@/test/test-utils';
 import { errorTracking } from '@/lib/error-tracking';
 import { performanceMonitor } from '@/lib/performance';
 import { usePurchaseStore } from '@/store';

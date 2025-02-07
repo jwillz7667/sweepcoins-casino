@@ -1,19 +1,14 @@
-import { createContext, useContext } from 'react';
+import { type ReactNode } from 'react';
+import { AppContext } from './app-context';
+import type { AppContextType } from './app-context';
 
-export interface AppContextType {
-  error: Error | null;
-  setError: (error: Error | null) => void;
-  clearError: () => void;
+interface AppProviderProps {
+  children: ReactNode;
+  value: AppContextType;
 }
 
-export const AppContext = createContext<AppContextType | null>(null);
+const AppProvider = ({ children, value }: AppProviderProps) => {
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
 
-export const AppProvider = AppContext.Provider;
-
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
-}; 
+export default AppProvider; 
