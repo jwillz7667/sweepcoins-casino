@@ -16,11 +16,11 @@ export interface BTCPayInvoiceRequest {
 
 export interface BTCPayInvoice {
   id: string;
+  status: string;
   checkoutLink: string;
-  status: 'New' | 'Processing' | 'Settled' | 'Expired';
   amount: string;
   currency: string;
-  metadata: BTCPayMetadata;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   expiresAt: string;
 }

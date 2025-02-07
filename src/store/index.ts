@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Package } from '@/components/purchase/packages.data';
+import { type Package } from '@/types/package';
 
 interface PurchaseState {
   selectedPackage: Package | null;

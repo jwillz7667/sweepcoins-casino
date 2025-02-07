@@ -59,50 +59,68 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        console.log('Initializing auth state...');
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Got session:', session);
+        console.log('Starting auth initialization...');
+        setLoading(true);
+        
+        // Check if Supabase is configured
+        if (!supabase) {
+          throw new Error('Supabase client is not initialized');
+        }
+        
+        console.log('Fetching session...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          throw sessionError;
+        }
+        
+        console.log('Session status:', session ? 'Found' : 'Not found');
         
         if (session?.user) {
-          console.log('Session exists, fetching user profile...');
+          console.log('Fetching profile for user:', session.user.id);
           const profile = await fetchUserProfile(session.user.id);
-          console.log('Fetched profile:', profile);
           
           if (profile) {
+            console.log('Setting user state with profile:', profile);
             setUser({
               id: session.user.id,
               email: session.user.email || '',
               username: profile.username || '',
               sweepcoins: profile.sweepcoins ?? 0,
             });
-            console.log('User state initialized:', {
-              id: session.user.id,
-              email: session.user.email,
-              username: profile.username,
-              sweepcoins: profile.sweepcoins ?? 0,
-            });
+          } else {
+            console.log('No profile found for user');
+            setUser(null);
           }
         } else {
-          console.log('No session found');
+          console.log('No active session found');
           setUser(null);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Auth initialization error:', error);
+        toast.error('Error initializing authentication');
+        setUser(null);
       } finally {
-        setLoading(false);
         console.log('Auth initialization complete');
+        setLoading(false);
       }
     };
 
+    // Start auth initialization
     initAuth();
 
-    // Listen for auth changes
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', { event, userId: session?.user?.id });
-      await updateUserState(session?.user || null);
+      console.log('Auth state changed:', { event, session });
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+      } else if (session?.user) {
+        await updateUserState(session.user);
+      }
     });
 
     return () => {
+      console.log('Cleaning up auth listener');
       subscription.unsubscribe();
     };
   }, [updateUserState]);
