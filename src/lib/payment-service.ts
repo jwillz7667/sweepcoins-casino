@@ -1,12 +1,20 @@
-import { type User } from '@/types/user';
 import { type Transaction } from '@/types/transaction';
-import { stripe } from './stripe';
-import { btcpay } from './btcpay';
 import { BTCPayService } from './btcpay';
 import { Package } from '@/types/package';
 import { BTCPayInvoice, BTCPayMetadata } from '@/types/btcpay';
+import { createClient } from '@supabase/supabase-js';
 
-export type PaymentMethod = 'credit_card' | 'bitcoin' | 'ethereum' | 'litecoin';
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+/**
+ * @deprecated 'credit_card' payment method is temporarily unavailable
+ * @deprecated 'ethereum' payment method is temporarily unavailable
+ * @deprecated 'litecoin' payment method is temporarily unavailable
+ */
+export type PaymentMethod = 'bitcoin' | 'credit_card' | 'ethereum' | 'litecoin';
 export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 
 export interface PaymentDetails {
@@ -14,7 +22,7 @@ export interface PaymentDetails {
   currency: string;
   method: PaymentMethod;
   userId: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 export interface RefundDetails {
@@ -61,9 +69,9 @@ export class PaymentService {
     }
   }
 
-  async getWebhookDeliveries(webhookId: string) {
+  async getWebhookDeliveries() {
     try {
-      return await this.btcPayService.getWebhookDeliveries(webhookId);
+      return await this.btcPayService.getWebhookDeliveries();
     } catch (error) {
       console.error('Failed to get webhook deliveries:', error);
       throw new Error('Failed to get webhook deliveries');
@@ -72,68 +80,76 @@ export class PaymentService {
 
   async processPayment(details: PaymentDetails): Promise<Transaction> {
     try {
-      switch (details.method) {
-        case 'credit_card':
-          return await this.processCreditCardPayment(details);
-        case 'bitcoin':
-        case 'ethereum':
-        case 'litecoin':
-          return await this.processCryptoPayment(details);
-        default:
-          throw new Error('Unsupported payment method');
+      if (details.method !== 'bitcoin') {
+        throw new Error(`Payment method '${details.method}' is temporarily unavailable. Please use Bitcoin for payments.`);
       }
+
+      const metadata: BTCPayMetadata = {
+        userId: details.userId,
+        packageId: details.metadata?.packageId as string,
+        coins: details.metadata?.coins as number
+      };
+
+      const invoice = await this.btcPayService.createInvoice({
+        price: details.amount,
+        currency: details.currency,
+        metadata
+      });
+
+      return {
+        id: invoice.id,
+        status: 'pending',
+        amount: details.amount,
+        currency: details.currency,
+        method: details.method,
+        userId: details.userId,
+        createdAt: new Date(),
+        metadata: details.metadata as Record<string, string | number | boolean | null>,
+      };
     } catch (error) {
       console.error('Payment processing error:', error);
       throw error;
     }
   }
 
-  private async processCreditCardPayment(details: PaymentDetails): Promise<Transaction> {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: details.amount,
-      currency: details.currency,
-      metadata: details.metadata,
-    });
-
-    return {
-      id: paymentIntent.id,
-      status: 'pending',
-      amount: details.amount,
-      currency: details.currency,
-      method: details.method,
-      userId: details.userId,
-      createdAt: new Date(),
-      metadata: details.metadata,
-    };
-  }
-
-  private async processCryptoPayment(details: PaymentDetails): Promise<Transaction> {
-    const invoice = await btcpay.createInvoice({
-      amount: details.amount,
-      currency: details.currency,
-      metadata: details.metadata,
-    });
-
-    return {
-      id: invoice.id,
-      status: 'pending',
-      amount: details.amount,
-      currency: details.currency,
-      method: details.method,
-      userId: details.userId,
-      createdAt: new Date(),
-      metadata: details.metadata,
-    };
-  }
-
   async getTransaction(transactionId: string): Promise<Transaction> {
-    // Implement transaction retrieval logic
-    throw new Error('Not implemented');
+    try {
+      const invoice = await this.btcPayService.getInvoice(transactionId);
+      return {
+        id: invoice.id,
+        status: invoice.status === 'Settled' ? 'completed' : invoice.status.toLowerCase() as TransactionStatus,
+        amount: invoice.amount,
+        currency: invoice.currency,
+        method: 'bitcoin',
+        userId: invoice.metadata?.userId as string,
+        createdAt: new Date(invoice.createdAt),
+        metadata: invoice.metadata as Record<string, string | number | boolean | null>
+      };
+    } catch (error) {
+      console.error('Failed to get transaction:', error);
+      throw new Error('Failed to get transaction');
+    }
   }
 
   async getUserTransactions(userId: string): Promise<Transaction[]> {
-    // Implement user transactions retrieval logic
-    throw new Error('Not implemented');
+    try {
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('userId', userId)
+        .order('createdAt', { ascending: false });
+
+      if (!transactions) return [];
+      
+      return transactions.map((tx: Transaction) => ({
+        ...tx,
+        createdAt: new Date(tx.createdAt),
+        updatedAt: tx.updatedAt ? new Date(tx.updatedAt) : undefined
+      }));
+    } catch (error) {
+      console.error('Failed to get user transactions:', error);
+      throw new Error('Failed to get user transactions');
+    }
   }
 
   async processRefund(details: RefundDetails): Promise<Transaction> {
@@ -143,59 +159,35 @@ export class PaymentService {
       throw new Error('Transaction already refunded');
     }
 
-    // Process refund based on payment method
-    switch (transaction.method) {
-      case 'credit_card':
-        return await this.processCreditCardRefund(transaction, details);
-      case 'bitcoin':
-      case 'ethereum':
-      case 'litecoin':
-        return await this.processCryptoRefund(transaction, details);
-      default:
-        throw new Error('Unsupported refund method');
-    }
-  }
+    const refundAmount = details.amount ?? transaction.amount;
 
-  private async processCreditCardRefund(
-    transaction: Transaction,
-    details: RefundDetails
-  ): Promise<Transaction> {
-    await stripe.refunds.create({
-      payment_intent: transaction.id,
-      amount: details.amount || transaction.amount,
-      reason: details.reason,
+    await this.btcPayService.createRefund(transaction.id, {
+      amount: refundAmount,
+      description: details.reason
     });
 
     return {
       ...transaction,
       status: 'refunded',
-      refundDetails: details,
-      updatedAt: new Date(),
-    };
-  }
-
-  private async processCryptoRefund(
-    transaction: Transaction,
-    details: RefundDetails
-  ): Promise<Transaction> {
-    await btcpay.createRefund({
-      invoiceId: transaction.id,
-      amount: details.amount || transaction.amount,
-      reason: details.reason,
-    });
-
-    return {
-      ...transaction,
-      status: 'refunded',
-      refundDetails: details,
+      refundDetails: {
+        reason: details.reason,
+        amount: refundAmount,
+        processedAt: new Date()
+      },
       updatedAt: new Date(),
     };
   }
 
   async generateReceipt(transactionId: string): Promise<string> {
     const transaction = await this.getTransaction(transactionId);
-    // Implement receipt generation logic
-    throw new Error('Not implemented');
+    return `
+Receipt for Transaction ${transaction.id}
+Date: ${transaction.createdAt.toLocaleDateString()}
+Amount: ${transaction.amount} ${transaction.currency}
+Status: ${transaction.status}
+Method: ${transaction.method}
+${transaction.refundDetails ? `Refund: ${transaction.refundDetails.amount} (${transaction.refundDetails.reason})` : ''}
+    `.trim();
   }
 }
 
