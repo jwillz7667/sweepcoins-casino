@@ -4,5 +4,5 @@ export interface BTCPayInvoice {
   checkoutLink: string;
   amount: number;
   currency: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
 } 

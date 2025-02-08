@@ -9,7 +9,7 @@ export interface Transaction {
   userId: string;
   createdAt: Date;
   updatedAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
   refundDetails?: {
     reason: string;
     amount: number;

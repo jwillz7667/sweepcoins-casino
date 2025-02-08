@@ -1,26 +1,57 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { 
   BTCPayInvoice, 
   BTCPayInvoiceRequest,
   BTCPayServiceInterface,
   BTCPayWebhookDelivery,
   BTCPayWebhookRequest,
-  InvoiceStatus
+  InvoiceStatus,
+  BTCPayRefundRequest,
+  BTCPayRefundResponse
 } from '@/types/btcpay';
 
 // Configuration constants
-const RETRY_DELAYS = [1000, 2000, 4000];
-const RATE_LIMIT_WINDOW = 60000;
+const RETRY_DELAYS = [1000, 2000, 4000, 8000]; // Exponential backoff
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 30;
-const WEBHOOK_EVENTS = ['InvoiceCreated', 'InvoiceReceivedPayment', 'InvoiceProcessing', 'InvoiceExpired', 'InvoiceSettled', 'InvoiceInvalid'];
+const WEBHOOK_EVENTS = [
+  'InvoiceCreated',
+  'InvoiceReceivedPayment',
+  'InvoiceProcessing',
+  'InvoiceExpired',
+  'InvoiceSettled',
+  'InvoiceInvalid',
+  'InvoicePaymentSettled'
+];
+
+// Rate limit handling constants
+const MAX_RETRY_WAIT = 300000; // 5 minutes maximum wait
+const MIN_RETRY_WAIT = 1000; // 1 second minimum wait
+const DEFAULT_RETRY_WAIT = 60000; // 1 minute default wait
+const MAX_CONSECUTIVE_RATE_LIMITS = 3; // Maximum number of consecutive rate limit retries
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const INVOICE_POLL_INTERVAL = 5000; // 5 seconds
+const MAX_POLL_DURATION = 30 * 60 * 1000; // 30 minutes
+
+interface BTCPayWebhookResponse {
+  id: string;
+  url: string;
+  events: string[];
+  enabled: boolean;
+  automaticRedelivery: boolean;
+}
 
 export class BTCPayService implements BTCPayServiceInterface {
   private readonly apiKey: string;
   private readonly serverUrl: string;
   private readonly storeId: string;
+  private readonly axiosInstance: AxiosInstance;
   private requestTimestamps: number[] = [];
-  private invoiceCache = new Map<string, { invoice: BTCPayInvoice, timestamp: number }>();
+  private consecutiveRateLimits = 0;
+  private invoiceCache = new Map<string, { invoice: BTCPayInvoice; timestamp: number }>();
   private statusListeners = new Map<string, ((status: InvoiceStatus) => void)[]>();
+  private currentWebhookId?: string;
 
   constructor() {
     this.apiKey = import.meta.env.VITE_BTCPAY_API_KEY || '';
@@ -31,23 +62,68 @@ export class BTCPayService implements BTCPayServiceInterface {
       throw new Error('BTCPay Server configuration is missing');
     }
 
-    // Initialize webhook on service start
-    this.initializeWebhook().catch(console.error);
-  }
-
-  private get axiosInstance() {
-    return axios.create({
+    this.axiosInstance = axios.create({
       baseURL: this.serverUrl,
       headers: {
         'Authorization': `token ${this.apiKey}`,
         'Content-Type': 'application/json',
       },
+      timeout: 10000, // 10 second timeout
     });
+
+    // Add response interceptor for error handling
+    this.axiosInstance.interceptors.response.use(
+      response => response,
+      this.handleAxiosError.bind(this)
+    );
+
+    // Initialize webhook on service start
+    this.initializeWebhook().catch(console.error);
   }
 
-  private async waitForRetry(attempt: number): Promise<void> {
-    const delay = RETRY_DELAYS[attempt] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
-    await new Promise(resolve => setTimeout(resolve, delay));
+  private async handleAxiosError(error: AxiosError) {
+    if (error.response?.status === 429) {
+      this.consecutiveRateLimits++;
+      
+      // If we've hit too many consecutive rate limits, throw an error
+      if (this.consecutiveRateLimits > MAX_CONSECUTIVE_RATE_LIMITS) {
+        this.consecutiveRateLimits = 0;
+        throw new Error('Maximum rate limit retries exceeded. Please try again later.');
+      }
+
+      // Get retry-after value from headers
+      let retryAfter: number;
+      try {
+        const headerValue = error.response.headers['retry-after'];
+        retryAfter = headerValue ? parseInt(headerValue, 10) * 1000 : DEFAULT_RETRY_WAIT;
+        
+        // Validate the retry-after value
+        if (isNaN(retryAfter) || retryAfter < MIN_RETRY_WAIT) {
+          retryAfter = MIN_RETRY_WAIT;
+        } else if (retryAfter > MAX_RETRY_WAIT) {
+          retryAfter = MAX_RETRY_WAIT;
+        }
+
+        // Apply exponential backoff based on consecutive rate limits
+        retryAfter = Math.min(retryAfter * Math.pow(2, this.consecutiveRateLimits - 1), MAX_RETRY_WAIT);
+      } catch (e) {
+        retryAfter = DEFAULT_RETRY_WAIT;
+      }
+
+      console.warn(`Rate limit exceeded. Waiting ${retryAfter/1000} seconds before retry. Attempt: ${this.consecutiveRateLimits}`);
+      
+      await new Promise(resolve => setTimeout(resolve, retryAfter));
+      return this.axiosInstance.request(error.config!);
+    }
+
+    // Reset consecutive rate limits on non-429 errors
+    this.consecutiveRateLimits = 0;
+
+    if (error.response?.status === 401) {
+      console.error('BTCPay authentication failed. Please check your API key.');
+    }
+
+    throw error;
   }
 
   private isRateLimited(): boolean {
@@ -62,51 +138,38 @@ export class BTCPayService implements BTCPayServiceInterface {
     this.requestTimestamps.push(Date.now());
   }
 
-  private getCachedInvoice(key: string): BTCPayInvoice | null {
-    const cached = this.invoiceCache.get(key);
-    if (cached && Date.now() - cached.timestamp < 30000) { // 30 seconds cache
-      return cached.invoice;
-    }
-    this.invoiceCache.delete(key);
-    return null;
-  }
-
-  private setCachedInvoice(key: string, invoice: BTCPayInvoice): void {
-    this.invoiceCache.set(key, { invoice, timestamp: Date.now() });
-  }
-
   private async initializeWebhook(): Promise<void> {
     try {
-      // Check existing webhooks
-      const { data: webhooks } = await this.axiosInstance.get(
+      const { data: webhooks } = await this.axiosInstance.get<BTCPayWebhookResponse[]>(
         `/api/v1/stores/${this.storeId}/webhooks`
       );
 
-      const existingWebhook = webhooks.find((w: any) => 
+      const existingWebhook = webhooks.find((w: BTCPayWebhookResponse) => 
         w.url === `${window.location.origin}/api/btcpay/webhook`
       );
 
       if (existingWebhook) {
-        // Update existing webhook if needed
+        this.currentWebhookId = existingWebhook.id;
         if (!this.areWebhookSettingsCorrect(existingWebhook)) {
           await this.updateWebhook(existingWebhook.id);
         }
       } else {
-        // Create new webhook
-        await this.createWebhook();
+        const newWebhook = await this.createWebhook();
+        this.currentWebhookId = newWebhook.id;
       }
     } catch (error) {
       console.error('Failed to initialize webhook:', error);
+      throw error;
     }
   }
 
-  private areWebhookSettingsCorrect(webhook: any): boolean {
+  private areWebhookSettingsCorrect(webhook: BTCPayWebhookResponse): boolean {
     return WEBHOOK_EVENTS.every(event => webhook.events.includes(event)) &&
            webhook.enabled === true &&
            webhook.automaticRedelivery === true;
   }
 
-  private async createWebhook(): Promise<void> {
+  private async createWebhook(): Promise<{ id: string }> {
     const webhookData: BTCPayWebhookRequest = {
       url: `${window.location.origin}/api/btcpay/webhook`,
       events: WEBHOOK_EVENTS,
@@ -115,10 +178,12 @@ export class BTCPayService implements BTCPayServiceInterface {
       secret: import.meta.env.VITE_BTCPAY_WEBHOOK_SECRET
     };
 
-    await this.axiosInstance.post(
+    const response = await this.axiosInstance.post(
       `/api/v1/stores/${this.storeId}/webhooks`,
       webhookData
     );
+
+    return response.data;
   }
 
   private async updateWebhook(webhookId: string): Promise<void> {
@@ -136,58 +201,16 @@ export class BTCPayService implements BTCPayServiceInterface {
     );
   }
 
-  public subscribeToInvoiceStatus(invoiceId: string, callback: (status: InvoiceStatus) => void): () => void {
-    if (!this.statusListeners.has(invoiceId)) {
-      this.statusListeners.set(invoiceId, []);
+  private getCachedInvoice(key: string): BTCPayInvoice | null {
+    const cached = this.invoiceCache.get(key);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.invoice;
     }
-    this.statusListeners.get(invoiceId)!.push(callback);
-
-    // Start polling for status
-    this.pollInvoiceStatus(invoiceId);
-
-    // Return unsubscribe function
-    return () => {
-      const listeners = this.statusListeners.get(invoiceId) || [];
-      const index = listeners.indexOf(callback);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
-      if (listeners.length === 0) {
-        this.statusListeners.delete(invoiceId);
-      }
-    };
+    return null;
   }
 
-  private async pollInvoiceStatus(invoiceId: string): Promise<void> {
-    const POLL_INTERVAL = 5000; // 5 seconds
-    const MAX_POLLS = 360; // 30 minutes maximum
-    let polls = 0;
-
-    const poll = async () => {
-      if (!this.statusListeners.has(invoiceId) || polls >= MAX_POLLS) {
-        return;
-      }
-
-      try {
-        const invoice = await this.getInvoice(invoiceId);
-        const listeners = this.statusListeners.get(invoiceId) || [];
-        listeners.forEach(callback => callback(invoice.status));
-
-        // Stop polling if in final state
-        if (['Settled', 'Invalid', 'Expired'].includes(invoice.status)) {
-          this.statusListeners.delete(invoiceId);
-          return;
-        }
-
-        polls++;
-        setTimeout(poll, POLL_INTERVAL);
-      } catch (error) {
-        console.error(`Error polling invoice ${invoiceId}:`, error);
-        setTimeout(poll, POLL_INTERVAL);
-      }
-    };
-
-    poll();
+  private setCachedInvoice(key: string, invoice: BTCPayInvoice): void {
+    this.invoiceCache.set(key, { invoice, timestamp: Date.now() });
   }
 
   async createInvoice(params: BTCPayInvoiceRequest): Promise<BTCPayInvoice> {
@@ -198,7 +221,7 @@ export class BTCPayService implements BTCPayServiceInterface {
     });
 
     const cachedInvoice = this.getCachedInvoice(cacheKey);
-    if (cachedInvoice) {
+    if (cachedInvoice && !['Expired', 'Invalid'].includes(cachedInvoice.status)) {
       return cachedInvoice;
     }
 
@@ -218,10 +241,12 @@ export class BTCPayService implements BTCPayServiceInterface {
             metadata: params.metadata,
             checkout: {
               redirectURL: params.redirectURL,
-              defaultPaymentMethod: "BTC",
-              expirationMinutes: 30,
-              monitoringMinutes: 60,
-              speedPolicy: "MediumSpeed",
+              defaultPaymentMethod: params.checkout?.defaultPaymentMethod || "BTC",
+              expirationMinutes: params.checkout?.expirationMinutes || 30,
+              monitoringMinutes: params.checkout?.monitoringMinutes || 60,
+              speedPolicy: params.checkout?.speedPolicy || "MediumSpeed",
+              paymentMethods: params.checkout?.paymentMethods,
+              paymentMethodCriteria: params.checkout?.paymentMethodCriteria,
             },
           }
         );
@@ -235,97 +260,165 @@ export class BTCPayService implements BTCPayServiceInterface {
           metadata: response.data.metadata,
           createdAt: response.data.createdTime,
           expiresAt: response.data.expirationTime,
+          monitoringExpiration: response.data.monitoringExpiration,
+          paymentMethods: response.data.paymentMethods,
         };
 
         this.setCachedInvoice(cacheKey, invoice);
+        this.pollInvoiceStatus(invoice.id);
         return invoice;
 
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError<{ message?: string }>;
-          
-          if (
-            attempt === RETRY_DELAYS.length ||
-            (axiosError.response?.status !== 429 &&
-             axiosError.response?.status !== 500 &&
-             axiosError.response?.status !== 503)
-          ) {
-            throw new Error(`Failed to create BTCPay invoice: ${axiosError.response?.data?.message || axiosError.message}`);
-          }
-
-          await this.waitForRetry(attempt);
-          continue;
-        }
-        throw error;
+        if (attempt === RETRY_DELAYS.length) throw error;
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]));
       }
     }
 
-    throw new Error('Failed to create BTCPay invoice after all retry attempts');
+    throw new Error('Failed to create invoice after all retry attempts');
   }
 
   async getInvoice(invoiceId: string): Promise<BTCPayInvoice> {
-    for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-      try {
-        const response = await this.axiosInstance.get(
-          `/api/v1/stores/${this.storeId}/invoices/${invoiceId}`
-        );
-
-        return {
-          id: response.data.id,
-          status: response.data.status,
-          checkoutLink: response.data.checkoutLink,
-          amount: response.data.amount,
-          currency: response.data.currency,
-          metadata: response.data.metadata,
-          createdAt: response.data.createdTime,
-          expiresAt: response.data.expirationTime,
-        };
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError;
-          
-          if (
-            attempt === RETRY_DELAYS.length ||
-            (axiosError.response?.status !== 429 &&
-             axiosError.response?.status !== 500 &&
-             axiosError.response?.status !== 503)
-          ) {
-            throw new Error('Failed to get BTCPay invoice');
-          }
-
-          await this.waitForRetry(attempt);
-          continue;
-        }
-        throw error;
-      }
-    }
-
-    throw new Error('Failed to get BTCPay invoice after all retry attempts');
-  }
-
-  async getWebhookDeliveries(webhookId: string): Promise<BTCPayWebhookDelivery[]> {
     try {
       const response = await this.axiosInstance.get(
-        `/api/v1/stores/${this.storeId}/webhooks/${webhookId}/deliveries`
+        `/api/v1/stores/${this.storeId}/invoices/${invoiceId}`
+      );
+
+      return {
+        id: response.data.id,
+        status: response.data.status,
+        checkoutLink: response.data.checkoutLink,
+        amount: response.data.amount,
+        currency: response.data.currency,
+        metadata: response.data.metadata,
+        createdAt: response.data.createdTime,
+        expiresAt: response.data.expirationTime,
+        monitoringExpiration: response.data.monitoringExpiration,
+        paymentMethods: response.data.paymentMethods,
+      };
+    } catch (error) {
+      console.error('Failed to get invoice:', error);
+      throw error;
+    }
+  }
+
+  async getWebhookDeliveries(): Promise<BTCPayWebhookDelivery[]> {
+    try {
+      if (!this.currentWebhookId) {
+        await this.initializeWebhook();
+      }
+      const response = await this.axiosInstance.get(
+        `/api/v1/stores/${this.storeId}/webhooks/${this.currentWebhookId}/deliveries`
       );
       return response.data;
     } catch (error) {
-      console.error('BTCPay getWebhookDeliveries error:', error);
-      throw new Error('Failed to get webhook deliveries');
+      console.error('Failed to get webhook deliveries:', error);
+      throw error;
     }
   }
 
-  async createRefund(invoiceId: string, amount?: number): Promise<any> {
+  async createRefund(invoiceId: string, params?: BTCPayRefundRequest): Promise<BTCPayRefundResponse> {
     try {
       const response = await this.axiosInstance.post(
         `/api/v1/stores/${this.storeId}/invoices/${invoiceId}/refund`,
-        amount ? { amount } : {}
+        params || {}
       );
       return response.data;
     } catch (error) {
       console.error('Failed to create refund:', error);
-      throw new Error('Failed to create refund');
+      throw error;
     }
+  }
+
+  async archiveInvoice(invoiceId: string): Promise<void> {
+    try {
+      await this.axiosInstance.delete(
+        `/api/v1/stores/${this.storeId}/invoices/${invoiceId}`
+      );
+    } catch (error) {
+      console.error('Failed to archive invoice:', error);
+      throw error;
+    }
+  }
+
+  async unarchiveInvoice(invoiceId: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/api/v1/stores/${this.storeId}/invoices/${invoiceId}/unarchive`
+      );
+    } catch (error) {
+      console.error('Failed to unarchive invoice:', error);
+      throw error;
+    }
+  }
+
+  async markInvoiceStatus(invoiceId: string, status: 'Invalid' | 'Settled'): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/api/v1/stores/${this.storeId}/invoices/${invoiceId}/status`,
+        { status }
+      );
+    } catch (error) {
+      console.error(`Failed to mark invoice as ${status}:`, error);
+      throw error;
+    }
+  }
+
+  subscribeToInvoiceStatus(
+    invoiceId: string,
+    callback: (status: InvoiceStatus) => void
+  ): () => void {
+    const listeners = this.statusListeners.get(invoiceId) || [];
+    listeners.push(callback);
+    this.statusListeners.set(invoiceId, listeners);
+    this.pollInvoiceStatus(invoiceId);
+
+    return () => {
+      const updatedListeners = this.statusListeners.get(invoiceId) || [];
+      const index = updatedListeners.indexOf(callback);
+      if (index !== -1) {
+        updatedListeners.splice(index, 1);
+        if (updatedListeners.length === 0) {
+          this.statusListeners.delete(invoiceId);
+        } else {
+          this.statusListeners.set(invoiceId, updatedListeners);
+        }
+      }
+    };
+  }
+
+  private async pollInvoiceStatus(invoiceId: string): Promise<void> {
+    const startTime = Date.now();
+    let lastStatus: InvoiceStatus | null = null;
+
+    const poll = async () => {
+      if (
+        !this.statusListeners.has(invoiceId) ||
+        Date.now() - startTime >= MAX_POLL_DURATION
+      ) {
+        return;
+      }
+
+      try {
+        const invoice = await this.getInvoice(invoiceId);
+        if (invoice.status !== lastStatus) {
+          lastStatus = invoice.status;
+          const listeners = this.statusListeners.get(invoiceId) || [];
+          listeners.forEach(callback => callback(invoice.status));
+        }
+
+        if (['Settled', 'Invalid', 'Expired'].includes(invoice.status)) {
+          this.statusListeners.delete(invoiceId);
+          return;
+        }
+
+        setTimeout(poll, INVOICE_POLL_INTERVAL);
+      } catch (error) {
+        console.error(`Error polling invoice ${invoiceId}:`, error);
+        setTimeout(poll, INVOICE_POLL_INTERVAL);
+      }
+    };
+
+    poll();
   }
 }
 

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { BTCPayWebhookPayload } from '@/types/btcpay';

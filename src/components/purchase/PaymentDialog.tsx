@@ -64,8 +64,6 @@ const STATUS_MESSAGES: Record<InvoiceStatus, {
   }
 };
 
-const EXPIRATION_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds
-
 export function PaymentDialog({
   isOpen,
   onClose,
@@ -103,7 +101,7 @@ export function PaymentDialog({
         unsubscribe();
       }
     };
-  }, [currentInvoice?.id, onPaymentComplete]);
+  }, [currentInvoice?.id, currentInvoice?.status, onPaymentComplete]);
 
   // Handle expiration timer
   useEffect(() => {
@@ -229,7 +227,11 @@ export function PaymentDialog({
                           className="w-full h-2"
                         />
                         <div className="flex items-center justify-center gap-2 text-sm">
-                          {StatusIcon && <StatusIcon className={cn("h-5 w-5", statusInfo.color)} />}
+                          {StatusIcon && (
+                            <div className={cn("h-5 w-5", statusInfo.color)}>
+                              <StatusIcon />
+                            </div>
+                          )}
                           <p className={cn("font-medium", statusInfo.color)}>
                             {statusInfo.message}
                           </p>
