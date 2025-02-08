@@ -50,6 +50,7 @@ export interface BTCPayInvoiceRequest {
     [key: string]: unknown;
   };
   checkout?: BTCPayCheckoutOptions;
+  redirectURL?: string;
 }
 
 export interface BTCPayPaymentMethod {
