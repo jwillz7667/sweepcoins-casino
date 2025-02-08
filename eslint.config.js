@@ -7,7 +7,11 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   { ignores: ["dist"] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    extends: [
+      "next/core-web-vitals",
+      "plugin:security/recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
@@ -16,6 +20,8 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "security": "eslint-plugin-security",
+      "sonarjs": "eslint-plugin-sonarjs"
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -24,6 +30,10 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "security/detect-object-injection": "warn",
+      "security/detect-non-literal-fs-filename": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "sonarjs/cognitive-complexity": ["error", 15]
     },
   }
 );

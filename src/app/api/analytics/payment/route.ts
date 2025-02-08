@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth/middleware'
+import { checkRateLimit } from '@/lib'
+import { z } from 'zod'
+import { NextRequest } from 'next/server'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -123,4 +127,28 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req, ['admin'])
+  if (auth instanceof NextResponse) return auth
+
+  const rateLimited = await checkRateLimit(req, 'analytics', 30)
+  if (rateLimited) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+
+  // Add input validation
+  const PaymentAnalyticsSchema = z.object({
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
+  })
+  
+  const body = await req.json()
+  const result = PaymentAnalyticsSchema.safeParse(body)
+  
+  if (!result.success) {
+    return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
+  }
+
+  // Rest of implementation...
+  return NextResponse.json({ success: true })
 } 
