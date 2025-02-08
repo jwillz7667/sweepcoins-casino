@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { BTCPayWebhookPayload } from '@/types/btcpay';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -33,124 +34,148 @@ function verifySignature(payload: string, signature: string): boolean {
   }
 }
 
+// Process webhook payload based on event type
+async function processWebhookPayload(payload: BTCPayWebhookPayload): Promise<void> {
+  const { type, invoiceId } = payload;
+
+  try {
+    // Record webhook event
+    await supabase.from('webhook_events').insert({
+      event_type: type,
+      invoice_id: invoiceId,
+      payload: payload,
+      processed_at: new Date().toISOString()
+    });
+
+    switch (type) {
+      case 'InvoiceCreated':
+        await handleInvoiceCreated(payload);
+        break;
+      case 'InvoiceReceivedPayment':
+        await handleInvoiceReceivedPayment(payload);
+        break;
+      case 'InvoiceProcessing':
+        await handleInvoiceProcessing(payload);
+        break;
+      case 'InvoiceSettled':
+        await handleInvoiceSettled(payload);
+        break;
+      case 'InvoiceExpired':
+        await handleInvoiceExpired(payload);
+        break;
+      case 'InvoiceInvalid':
+        await handleInvoiceInvalid(payload);
+        break;
+      case 'InvoicePaymentSettled':
+        await handleInvoicePaymentSettled(payload);
+        break;
+      default:
+        console.warn(`Unhandled webhook event type: ${type}`);
+    }
+  } catch (error) {
+    console.error(`Error processing webhook payload for invoice ${invoiceId}:`, error);
+    throw error;
+  }
+}
+
+async function handleInvoiceCreated(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId } = payload;
+  
+  await supabase.from('invoices').insert({
+    id: invoiceId,
+    status: 'New',
+    created_at: new Date().toISOString()
+  });
+}
+
+async function handleInvoiceReceivedPayment(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId, payment } = payload;
+  
+  if (payment) {
+    await supabase.from('payments').insert({
+      invoice_id: invoiceId,
+      amount: payment.value,
+      currency: payment.currency,
+      crypto_code: payment.cryptoCode,
+      destination: payment.destination,
+      received_at: new Date().toISOString()
+    });
+  }
+  
+  await supabase.from('invoices').update({
+    status: 'Processing',
+    updated_at: new Date().toISOString()
+  }).eq('id', invoiceId);
+}
+
+async function handleInvoiceProcessing(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId } = payload;
+  
+  await supabase.from('invoices').update({
+    status: 'Processing',
+    updated_at: new Date().toISOString()
+  }).eq('id', invoiceId);
+}
+
+async function handleInvoiceSettled(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId } = payload;
+  
+  await supabase.from('invoices').update({
+    status: 'Settled',
+    settled_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }).eq('id', invoiceId);
+}
+
+async function handleInvoiceExpired(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId } = payload;
+  
+  await supabase.from('invoices').update({
+    status: 'Expired',
+    updated_at: new Date().toISOString()
+  }).eq('id', invoiceId);
+}
+
+async function handleInvoiceInvalid(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId } = payload;
+  
+  await supabase.from('invoices').update({
+    status: 'Invalid',
+    updated_at: new Date().toISOString()
+  }).eq('id', invoiceId);
+}
+
+async function handleInvoicePaymentSettled(payload: BTCPayWebhookPayload): Promise<void> {
+  const { invoiceId, payment } = payload;
+  
+  if (payment) {
+    await supabase.from('payments').update({
+      status: 'Settled',
+      settled_at: new Date().toISOString()
+    }).eq('invoice_id', invoiceId);
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    // Get the BTCPay signature from headers
-    const headersList = headers();
-    const signature = headersList.get('BTCPay-Sig');
+    const signature = request.headers.get('BTCPay-Sig');
     
     if (!signature) {
-      return NextResponse.json(
-        { error: 'Missing signature' },
-        { status: 401 }
-      );
+      return new NextResponse('Missing BTCPay signature', { status: 401 });
     }
 
-    // Get the raw payload
-    const rawPayload = await request.text();
+    const body = await request.text();
     
-    // Verify the signature
-    if (!verifySignature(rawPayload, signature)) {
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+    if (!verifySignature(body, signature)) {
+      return new NextResponse('Invalid signature', { status: 401 });
     }
 
-    // Parse the payload
-    const payload = JSON.parse(rawPayload);
-    
-    // Handle different webhook types
-    switch (payload.type) {
-      case 'InvoiceReceivedPayment':
-        // Update transaction status to processing
-        await supabase
-          .from('transactions')
-          .update({
-            status: 'processing',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('btcpay_invoice_id', payload.invoiceId);
-        break;
+    const payload: BTCPayWebhookPayload = JSON.parse(body);
+    await processWebhookPayload(payload);
 
-      case 'InvoiceProcessing':
-        // Update transaction status to processing
-        await supabase
-          .from('transactions')
-          .update({
-            status: 'processing',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('btcpay_invoice_id', payload.invoiceId);
-        break;
-
-      case 'InvoiceSettled':
-        // Get the transaction and purchase intent
-        const { data: transaction, error: txError } = await supabase
-          .from('transactions')
-          .select('*, purchase_intents(*)')
-          .eq('btcpay_invoice_id', payload.invoiceId)
-          .single();
-
-        if (txError || !transaction) {
-          console.error('Error fetching transaction:', txError);
-          return NextResponse.json(
-            { error: 'Transaction not found' },
-            { status: 404 }
-          );
-        }
-
-        // Begin transaction
-        const { error: updateError } = await supabase.rpc('process_payment', {
-          transaction_id: transaction.id,
-          user_id: transaction.user_id,
-          coins_amount: transaction.purchase_intents.coins
-        });
-
-        if (updateError) {
-          console.error('Error processing payment:', updateError);
-          return NextResponse.json(
-            { error: 'Failed to process payment' },
-            { status: 500 }
-          );
-        }
-        break;
-
-      case 'InvoiceExpired':
-        // Update transaction status to expired
-        await supabase
-          .from('transactions')
-          .update({
-            status: 'expired',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('btcpay_invoice_id', payload.invoiceId);
-        break;
-
-      case 'InvoiceInvalid':
-        // Update transaction status to failed
-        await supabase
-          .from('transactions')
-          .update({
-            status: 'failed',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('btcpay_invoice_id', payload.invoiceId);
-        break;
-
-      default:
-        console.log('Unhandled webhook type:', payload.type);
-    }
-
-    return NextResponse.json(
-      { message: 'Webhook processed successfully' },
-      { status: 200 }
-    );
+    return new NextResponse('OK', { status: 200 });
   } catch (error) {
     console.error('Webhook processing error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 } 
