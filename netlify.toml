@@ -38,7 +38,25 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' *.trusted.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.supabase.co https://*.walletconnect.org;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:;
+      font-src 'self' data:;
+      connect-src 'self' 
+        https://*.supabase.co 
+        wss://*.supabase.co 
+        https://*.walletconnect.org 
+        wss://*.walletconnect.org 
+        https://btcpay.goldwavecasino.com 
+        https://*.infura.io 
+        wss://*.infura.io 
+        https://eth-mainnet.g.alchemy.com 
+        https://polygon-mainnet.g.alchemy.com;
+      frame-src 'self' https://*.walletconnect.org https://btcpay.goldwavecasino.com;
+      worker-src 'self' blob:;
+    """
     Permissions-Policy = "geolocation=(), microphone=()"
 
 # Force HTTPS
@@ -87,4 +105,5 @@
         https://polygon-mainnet.g.alchemy.com;
       frame-src 'self' https://*.walletconnect.org https://btcpay.goldwavecasino.com;
       worker-src 'self' blob:;
-      """ 
+    """
+    Permissions-Policy = "geolocation=(), microphone=()" 
