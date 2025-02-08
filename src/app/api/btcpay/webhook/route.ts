@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { BTCPayWebhookPayload } from '@/types/btcpay';
+import { checkRateLimit } from '@/lib';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -11,26 +12,12 @@ const supabase = createClient(
 
 // Verify BTCPay webhook signature
 function verifySignature(payload: string, signature: string): boolean {
-  try {
-    const secret = process.env.VITE_BTCPAY_WEBHOOK_SECRET;
-    if (!secret) {
-      console.error('BTCPay webhook secret is not configured');
-      return false;
-    }
+  const secret = process.env.VITE_BTCPAY_WEBHOOK_SECRET
+  if (!secret) throw new Error('BTCPay webhook secret not configured')
 
-    const computedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex');
-
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(computedSignature)
-    );
-  } catch (error) {
-    console.error('Error verifying webhook signature:', error);
-    return false;
-  }
+  const hmac = crypto.createHmac('sha256', secret)
+  const digest = hmac.update(payload).digest('hex')
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))
 }
 
 // Process webhook payload based on event type
@@ -155,26 +142,33 @@ async function handleInvoicePaymentSettled(payload: BTCPayWebhookPayload): Promi
   }
 }
 
-export async function POST(request: Request) {
+export const runtime = "edge"
+export const dynamic = "force-dynamic"
+
+export async function POST(req: NextRequest) {
+  // Add rate limiting for webhook origin verification
+  const rateLimited = await checkRateLimit(req, 'btcpay-webhook', 25)
+  if (rateLimited) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+
   try {
-    const signature = request.headers.get('BTCPay-Sig');
+    const signature = req.headers.get('BTCPay-Sig');
     
     if (!signature) {
-      return new NextResponse('Missing BTCPay signature', { status: 401 });
+      return NextResponse.json({ error: 'Missing BTCPay signature' }, { status: 401 });
     }
 
-    const body = await request.text();
+    const body = await req.text();
     
     if (!verifySignature(body, signature)) {
-      return new NextResponse('Invalid signature', { status: 401 });
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     const payload: BTCPayWebhookPayload = JSON.parse(body);
     await processWebhookPayload(payload);
 
-    return new NextResponse('OK', { status: 200 });
+    return NextResponse.json('OK', { status: 200 });
   } catch (error) {
     console.error('Webhook processing error:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json('Internal Server Error', { status: 500 });
   }
 } 

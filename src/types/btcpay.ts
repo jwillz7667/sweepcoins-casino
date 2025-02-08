@@ -14,6 +14,31 @@ export type InvoiceStatus =
   | 'Expired' 
   | 'Invalid';
 
+export type PaymentStatus = 
+  | 'New'
+  | 'Pending'
+  | 'Completed'
+  | 'Failed';
+
+export type SpeedPolicy = 
+  | 'HighSpeed' 
+  | 'MediumSpeed' 
+  | 'LowSpeed' 
+  | 'LowMediumSpeed';
+
+export interface BTCPayCheckoutOptions {
+  speedPolicy?: SpeedPolicy;
+  defaultPaymentMethod?: string;
+  expirationMinutes?: number;
+  monitoringMinutes?: number;
+  paymentMethods?: string[];
+  paymentMethodCriteria?: string[];
+  redirectURL?: string;
+  redirectAutomatically?: boolean;
+  requiresRefundEmail?: boolean;
+  defaultLanguage?: string;
+}
+
 export interface BTCPayInvoiceRequest {
   price: number;
   currency: string;
@@ -24,15 +49,27 @@ export interface BTCPayInvoiceRequest {
     orderId?: string;
     [key: string]: unknown;
   };
-  redirectURL?: string;
-  checkout?: {
-    speedPolicy?: 'HighSpeed' | 'MediumSpeed' | 'LowSpeed' | 'LowMediumSpeed';
-    defaultPaymentMethod?: string;
-    expirationMinutes?: number;
-    monitoringMinutes?: number;
-    paymentMethods?: string[];
-    paymentMethodCriteria?: string[];
-  };
+  checkout?: BTCPayCheckoutOptions;
+}
+
+export interface BTCPayPaymentMethod {
+  paymentMethod: string;
+  cryptoCode: string;
+  destination: string;
+  rate: number;
+  paymentLink?: string;
+  amount?: string;
+  due?: string;
+  totalPaid?: string;
+  networkFee?: string;
+  payments?: Array<{
+    id: string;
+    receivedDate: string;
+    value: string;
+    fee?: string;
+    status: PaymentStatus;
+    destination: string;
+  }>;
 }
 
 export interface BTCPayInvoice {
@@ -45,13 +82,10 @@ export interface BTCPayInvoice {
   createdAt: string;
   expiresAt: string;
   monitoringExpiration?: string;
-  paymentMethods?: Array<{
-    paymentMethod: string;
-    cryptoCode: string;
-    destination: string;
-    rate: number;
-    paymentLink?: string;
-  }>;
+  paymentMethods?: BTCPayPaymentMethod[];
+  additionalStatus?: string;
+  availableStatusesForManualMarking?: string[];
+  archived?: boolean;
 }
 
 export interface BTCPayWebhookPayload {
@@ -69,6 +103,8 @@ export interface BTCPayWebhookPayload {
     currency: string;
     cryptoCode: string;
     destination: string;
+    status?: PaymentStatus;
+    transactionId?: string;
   };
 }
 
@@ -88,21 +124,34 @@ export interface BTCPayWebhookDelivery {
   errorMessage?: string;
   payload: BTCPayWebhookPayload;
   status: number;
+  httpCode?: number;
+  attemptCount?: number;
+  nextRetry?: string;
 }
 
 export interface BTCPayRefundRequest {
   amount?: number;
   paymentMethod?: string;
   description?: string;
+  paymentMethodCriteria?: string[];
 }
 
 export interface BTCPayRefundResponse {
   id: string;
   invoiceId: string;
-  status: 'New' | 'Pending' | 'Completed' | 'Failed';
+  status: PaymentStatus;
   amount: number;
   description?: string;
   destination?: string;
+  paymentMethod?: string;
+  rate?: number;
+  transactionId?: string;
+}
+
+export interface BTCPayError {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
 }
 
 export interface BTCPayServiceInterface {
@@ -111,7 +160,11 @@ export interface BTCPayServiceInterface {
   getWebhookDeliveries(): Promise<BTCPayWebhookDelivery[]>;
   createRefund(invoiceId: string, params?: BTCPayRefundRequest): Promise<BTCPayRefundResponse>;
   subscribeToInvoiceStatus(invoiceId: string, callback: (status: InvoiceStatus) => void): () => void;
-  archiveInvoice?(invoiceId: string): Promise<void>;
-  unarchiveInvoice?(invoiceId: string): Promise<void>;
-  markInvoiceStatus?(invoiceId: string, status: 'Invalid' | 'Settled'): Promise<void>;
+  archiveInvoice(invoiceId: string): Promise<void>;
+  unarchiveInvoice(invoiceId: string): Promise<void>;
+  markInvoiceStatus(invoiceId: string, status: 'Invalid' | 'Settled'): Promise<void>;
+  getInvoicePaymentMethods(invoiceId: string): Promise<BTCPayPaymentMethod[]>;
+  getRefunds(invoiceId: string): Promise<BTCPayRefundResponse[]>;
+  cancelInvoice(invoiceId: string): Promise<void>;
+  updateInvoiceMetadata(invoiceId: string, metadata: Record<string, unknown>): Promise<void>;
 } 
