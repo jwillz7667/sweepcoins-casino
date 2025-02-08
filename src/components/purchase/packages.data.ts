@@ -2,27 +2,28 @@ import { type Package } from '@/types/package';
 
 export const packages: Package[] = [
   {
-    id: 1,
-    name: "Starter Pack",
-    price: 0.01,
-    btcPrice: 0.0004,
-    currency: "ETH",
-    coins: 1000
+    id: 'basic',
+    name: 'Starter Pack',
+    description: 'Perfect for casual players',
+    coins: 1000,
+    btcPrice: 0.001,
+    discountPercentage: 0
   },
   {
-    id: 2,
-    name: "Pro Pack",
-    price: 0.05,
-    btcPrice: 0.002,
-    currency: "ETH",
-    coins: 5000
-  },
-  {
-    id: 3,
-    name: "Elite Pack",
-    price: 0.1,
+    id: 'premium',
+    name: 'Premium Pack',
+    description: 'Most popular choice',
+    coins: 5000,
     btcPrice: 0.004,
-    currency: "ETH",
-    coins: 10000
+    discountPercentage: 10,
+    featured: true
+  },
+  {
+    id: 'elite',
+    name: 'Elite Pack',
+    description: 'Best value for serious players',
+    coins: 10000,
+    btcPrice: 0.007,
+    discountPercentage: 20
   }
 ]; 

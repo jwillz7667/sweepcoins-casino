@@ -1,8 +1,11 @@
 export interface Package {
-  id: number;
+  id: string;
   name: string;
-  price: number;
-  btcPrice: number;
-  currency: string;
+  description: string;
   coins: number;
-} 
+  btcPrice: number;
+  discountPercentage?: number;
+  featured?: boolean;
+}
+
+export type PackageId = string; 

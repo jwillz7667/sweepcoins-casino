@@ -2,6 +2,9 @@ import { type User } from '@/types/user';
 import { type Transaction } from '@/types/transaction';
 import { stripe } from './stripe';
 import { btcpay } from './btcpay';
+import { BTCPayService } from './btcpay';
+import { Package } from '@/types/package';
+import { BTCPayInvoice, BTCPayMetadata } from '@/types/btcpay';
 
 export type PaymentMethod = 'credit_card' | 'bitcoin' | 'ethereum' | 'litecoin';
 export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded';
@@ -20,7 +23,53 @@ export interface RefundDetails {
   amount?: number; // Optional for partial refunds
 }
 
-class PaymentService {
+export class PaymentService {
+  private btcPayService: BTCPayService;
+
+  constructor() {
+    this.btcPayService = new BTCPayService();
+  }
+
+  async createPayment(
+    pkg: Package,
+    userId?: string
+  ): Promise<BTCPayInvoice> {
+    try {
+      const metadata: BTCPayMetadata = {
+        packageId: pkg.id,
+        coins: pkg.coins,
+        userId
+      };
+
+      return await this.btcPayService.createInvoice({
+        price: pkg.btcPrice,
+        currency: 'BTC',
+        metadata
+      });
+    } catch (error) {
+      console.error('Failed to create payment:', error);
+      throw new Error('Failed to create payment');
+    }
+  }
+
+  async getPaymentStatus(invoiceId: string): Promise<BTCPayInvoice> {
+    try {
+      return await this.btcPayService.getInvoice(invoiceId);
+    } catch (error) {
+      console.error('Failed to get payment status:', error);
+      throw new Error('Failed to get payment status');
+    }
+  }
+
+  async getWebhookDeliveries(webhookId: string) {
+    try {
+      return await this.btcPayService.getWebhookDeliveries(webhookId);
+    } catch (error) {
+      console.error('Failed to get webhook deliveries:', error);
+      throw new Error('Failed to get webhook deliveries');
+    }
+  }
+
   async processPayment(details: PaymentDetails): Promise<Transaction> {
     try {
       switch (details.method) {

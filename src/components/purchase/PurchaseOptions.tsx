@@ -1,11 +1,10 @@
 import { memo, useEffect, useState } from 'react';
 import { toast } from "sonner";
-import { useWeb3 } from "@/hooks/use-web3";
 import { useBTCPay } from "@/hooks/use-btcpay";
 import { useApi } from '@/hooks/use-api';
 import { packages } from './packages.data';
 import { PaymentDialog } from './PaymentDialog';
-import { PackageCard } from './PurchaseCard';
+import { PurchaseCard } from './PurchaseCard';
 import { usePurchaseStore } from '@/store';
 import { useAppStore } from '@/store';
 import { usePerformance } from '@/hooks/use-performance';
@@ -14,17 +13,14 @@ import { errorTracking } from '@/lib/error-tracking';
 import { PurchaseIntent } from '@/types';
 
 export const PurchaseOptions = memo(() => {
-  const { account, sendTransaction } = useWeb3();
   const { createInvoice, checkInvoiceStatus, currentInvoice } = useBTCPay();
   const api = useApi();
   
   const {
     selectedPackage,
-    paymentMethod,
     isProcessing,
     activeInvoiceId,
     setSelectedPackage,
-    setPaymentMethod,
     setIsProcessing,
     setActiveInvoiceId,
     resetPurchaseState
@@ -37,90 +33,9 @@ export const PurchaseOptions = memo(() => {
   const performance = usePerformance({
     componentName: 'PurchaseOptions',
     tags: {
-      paymentMethod,
       hasSelectedPackage: String(!!selectedPackage),
-      isWalletConnected: String(!!account),
     },
   });
-
-  // Handle ETH purchase with performance tracking and error handling
-  const { execute: executeETHPurchase, isLoading: isETHPurchaseLoading } = useAsyncCallback<{ success: boolean; error?: Error }>(
-    async () => {
-      if (!selectedPackage || !account) {
-        return { success: false, error: new Error('No package selected or wallet not connected') };
-      }
-
-      const traceId = performance.startInteraction('eth_purchase', {
-        packageId: String(selectedPackage.id),
-        amount: String(selectedPackage.price),
-      });
-
-      try {
-        setIsProcessing(true);
-
-        // Create purchase intent first
-        const intent = await performance.measureOperation(
-          'create_purchase_intent',
-          () =>
-            api.post<PurchaseIntent>('/api/purchase/intent', {
-              packageId: selectedPackage.id,
-              amount: selectedPackage.price,
-              currency: 'ETH',
-            })
-        );
-
-        // Process transaction
-        const txResult = await performance.measureOperation(
-          'send_transaction',
-          () => sendTransaction(selectedPackage.price)
-        );
-
-        if (!txResult || !txResult.hash) {
-          throw new Error('Transaction failed or hash not received');
-        }
-
-        // Confirm purchase with backend
-        await performance.measureOperation(
-          'confirm_purchase',
-          () =>
-            api.post('/api/purchase/confirm', {
-              intentId: intent.id,
-              transactionHash: txResult.hash,
-            })
-        );
-
-        toast.success('Purchase successful!');
-        setIsDialogOpen(false);
-        resetPurchaseState();
-
-        performance.recordInteraction('eth_purchase_success');
-        return { success: true };
-      } catch (error) {
-        performance.recordInteraction('eth_purchase_error');
-        errorTracking.captureError(error, {
-          context: {
-            component: 'PurchaseOptions',
-            action: 'eth_purchase',
-            packageId: selectedPackage.id,
-            amount: selectedPackage.price,
-          }
-        });
-        return { 
-          success: false, 
-          error: error instanceof Error ? error : new Error('Purchase failed') 
-        };
-      } finally {
-        setIsProcessing(false);
-        performance.endInteraction(traceId);
-      }
-    },
-    {
-      onError: (error) => {
-        setError(error);
-        toast.error(error.message || 'Purchase failed. Please try again.');
-      },
-    }
-  );
 
   // Handle BTC purchase with performance tracking and error handling
   const { execute: executeBTCPurchase, isLoading: isBTCPurchaseLoading } = useAsyncCallback<{ success: boolean; error?: Error }>(
@@ -159,7 +74,6 @@ export const PurchaseOptions = memo(() => {
             const response = await createInvoice({
               price: selectedPackage.btcPrice,
               currency: 'BTC',
-              orderId: intent.id,
               metadata: {
                 packageId: String(selectedPackage.id),
                 coins: selectedPackage.coins,
@@ -176,7 +90,6 @@ export const PurchaseOptions = memo(() => {
         );
 
         setActiveInvoiceId(invoice.id);
-        window.open(invoice.checkoutLink, '_blank');
         performance.recordInteraction('btc_invoice_created');
         return { success: true };
       } catch (error) {
@@ -319,7 +232,7 @@ export const PurchaseOptions = memo(() => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg) => (
-          <PackageCard
+          <PurchaseCard
             key={pkg.id}
             package={pkg}
             onSelect={() => {
@@ -341,11 +254,9 @@ export const PurchaseOptions = memo(() => {
           resetPurchaseState();
         }}
         selectedPackage={selectedPackage}
-        onPaymentMethodChange={setPaymentMethod}
-        onETHPurchase={executeETHPurchase}
         onBTCPurchase={executeBTCPurchase}
         isProcessing={isProcessing}
-        isLoading={isETHPurchaseLoading || isBTCPurchaseLoading}
+        isLoading={isBTCPurchaseLoading}
         currentInvoice={currentInvoice}
       />
     </div>

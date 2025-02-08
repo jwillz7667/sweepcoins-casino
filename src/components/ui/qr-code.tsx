@@ -1,19 +1,20 @@
-import QRCodeReact from "react-qr-code";
+'use client';
+
+import { QRCodeSVG } from 'qrcode.react';
 
 interface QRCodeProps {
   value: string;
   size?: number;
 }
 
-export const QRCode = ({ value, size = 256 }: QRCodeProps) => {
+export function QRCode({ value, size = 256 }: QRCodeProps) {
   return (
-    <div className="p-4 bg-white rounded-lg">
-      <QRCodeReact
-        value={value}
-        size={size}
-        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-        viewBox={`0 0 ${size} ${size}`}
-      />
-    </div>
+    <QRCodeSVG
+      value={value}
+      size={size}
+      level="H"
+      includeMargin
+      className="rounded-lg"
+    />
   );
-}; 
+} 

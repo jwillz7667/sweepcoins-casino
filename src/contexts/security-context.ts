@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-interface SecurityContextType {
+export interface SecurityContextType {
   checkRateLimit: (key: string) => boolean;
   validateCSRFToken: (token: string) => boolean;
   validateSession: () => boolean;

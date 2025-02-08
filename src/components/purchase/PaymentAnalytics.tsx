@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Icons } from '@/components/ui/icons';
 import { paymentService } from '@/lib/payment-service';
-import { type Transaction } from '@/types/transaction';
 
 interface PaymentAnalytics {
   totalTransactions: number;
