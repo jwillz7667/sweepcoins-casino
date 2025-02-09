@@ -43,20 +43,38 @@ export class PaymentService {
     userId?: string
   ): Promise<BTCPayInvoice> {
     try {
+      console.log('Creating payment for package:', {
+        packageId: pkg.id,
+        btcPrice: pkg.btcPrice,
+        coins: pkg.coins,
+        userId
+      });
+
       const metadata: BTCPayMetadata = {
         packageId: pkg.id,
         coins: pkg.coins,
         userId
       };
 
-      return await this.btcPayService.createInvoice({
+      const invoice = await this.btcPayService.createInvoice({
         price: pkg.btcPrice,
         currency: 'BTC',
         metadata
       });
+
+      console.log('Payment created successfully:', {
+        invoiceId: invoice.id,
+        status: invoice.status
+      });
+
+      return invoice;
     } catch (error) {
-      console.error('Failed to create payment:', error);
-      throw new Error('Failed to create payment');
+      console.error('Failed to create payment:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        packageId: pkg.id,
+        userId
+      });
+      throw new Error('Failed to create payment. Please try again.');
     }
   }
 

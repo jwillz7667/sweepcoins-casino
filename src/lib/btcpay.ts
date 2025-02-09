@@ -74,6 +74,13 @@ export class BTCPayService implements BTCPayServiceInterface {
     this.serverUrl = import.meta.env.VITE_BTCPAY_SERVER_URL || '';
     this.storeId = import.meta.env.VITE_BTCPAY_STORE_ID || '';
 
+    console.log('BTCPay Service Initialization:', {
+      hasApiKey: !!this.apiKey,
+      hasServerUrl: !!this.serverUrl,
+      hasStoreId: !!this.storeId,
+      serverUrl: this.serverUrl // Only log the URL for debugging
+    });
+
     if (!this.apiKey || !this.serverUrl || !this.storeId) {
       throw new BTCPayServiceError(
         'BTCPay Server configuration is missing',
@@ -97,7 +104,13 @@ export class BTCPayService implements BTCPayServiceInterface {
     );
 
     // Initialize webhook on service start
-    this.initializeWebhook().catch(console.error);
+    this.initializeWebhook().catch(error => {
+      console.error('Webhook initialization failed:', {
+        error: error.message,
+        code: error.code,
+        details: error.details
+      });
+    });
   }
 
   private async handleAxiosError(error: AxiosError) {
@@ -193,6 +206,9 @@ export class BTCPayService implements BTCPayServiceInterface {
   }
 
   private areWebhookSettingsCorrect(webhook: BTCPayWebhookResponse): boolean {
+    if (!webhook || !webhook.events || !Array.isArray(webhook.events)) {
+      return false;
+    }
     return WEBHOOK_EVENTS.every(event => webhook.events.includes(event)) &&
            webhook.enabled === true &&
            webhook.automaticRedelivery === true;
@@ -243,6 +259,12 @@ export class BTCPayService implements BTCPayServiceInterface {
   }
 
   async createInvoice(params: BTCPayInvoiceRequest): Promise<BTCPayInvoice> {
+    console.log('Creating invoice with params:', {
+      price: params.price,
+      currency: params.currency,
+      hasMetadata: !!params.metadata
+    });
+
     const cacheKey = JSON.stringify({
       price: params.price,
       currency: params.currency,
