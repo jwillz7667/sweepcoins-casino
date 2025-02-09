@@ -4,8 +4,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { PurchaseOptions } from "@/components/purchase/PurchaseOptions";
 import { Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
 import { toast } from "sonner";
+import { PaymentDialog } from '@/components/purchase/PaymentDialog';
+import { Package } from '@/types/package';
+import { useBTCPay } from '@/hooks/use-btcpay';
 
 export default function Purchase() {
   const { user } = useAuth();

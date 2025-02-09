@@ -8,19 +8,13 @@ import type {
 } from '@/types/btcpay';
 import { Package } from '@/types/package';
 
-interface BTCPayContextType {
-  createInvoice: (pkg: Package) => Promise<BTCPayInvoice>;
-  getInvoiceStatus: (invoiceId: string) => Promise<InvoiceStatus>;
-  getPaymentMethods: (invoiceId: string) => Promise<BTCPayPaymentMethod[]>;
-  subscribeToInvoiceStatus: (
-    invoiceId: string,
-    callback: (status: InvoiceStatus) => void
-  ) => () => void;
-  isLoading: boolean;
-  error: Error | null;
+export interface BTCPayContextType {
+  createInvoice: (amount: number, currency: string) => Promise<BTCPayInvoice>;
+  getInvoice: (invoiceId: string) => Promise<BTCPayInvoice>;
+  btcPayService: BTCPayService;
 }
 
-const BTCPayContext = createContext<BTCPayContextType | undefined>(undefined);
+export const BTCPayContext = createContext<BTCPayContextType | null>(null);
 
 export function BTCPayProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +74,8 @@ export function BTCPayProvider({ children }: { children: React.ReactNode }) {
     getPaymentMethods,
     subscribeToInvoiceStatus,
     isLoading,
-    error
+    error,
+    btcPayService
   };
 
   return (

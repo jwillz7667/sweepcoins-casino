@@ -1,7 +1,12 @@
 import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 import { BTCPayWebhookPayload } from '@/types/btcpay';
-import { supabase } from '@/lib/supabase';
 import { errorTracking } from '@/lib/error-tracking';
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
 
 export class WebhookHandler {
   private readonly webhookSecret: string;
