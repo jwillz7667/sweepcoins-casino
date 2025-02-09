@@ -1,315 +1,150 @@
 'use client';
 
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useInvoice } from '@/hooks/use-invoice';
+import { Package } from '@/types/package';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Spinner } from '@/components/ui/spinner';
-import { type Package } from '@/types/package';
-import { type BTCPayInvoice, type InvoiceStatus } from '@/types/btcpay';
-import { QRCode } from '@/components/ui/qr-code';
-import { useCallback, useState, useEffect, useRef } from 'react';
-import { btcPayService } from '@/lib/btcpay';
+import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, CheckCircle2, XCircle, Clock, ExternalLink, RefreshCw } from 'lucide-react';
+import { BTCPayPaymentMethod } from '@/types/btcpay';
 
 interface PaymentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedPackage: Package | null;
-  onBTCPurchase: () => Promise<{ success: boolean; error?: Error }>;
-  isProcessing: boolean;
-  isLoading: boolean;
-  currentInvoice: BTCPayInvoice | null;
-  onPaymentComplete?: () => void;
+  selectedPackage: Package;
+  onPaymentSuccess?: () => void;
+  onPaymentError?: (error: Error) => void;
 }
-
-const STATUS_MESSAGES: Record<InvoiceStatus, { 
-  message: string; 
-  progress: number;
-  icon: React.ComponentType;
-  color: string;
-}> = {
-  'New': { 
-    message: 'Waiting for payment...', 
-    progress: 0,
-    icon: Clock,
-    color: 'text-blue-500'
-  },
-  'Processing': { 
-    message: 'Processing payment...', 
-    progress: 50,
-    icon: RefreshCw,
-    color: 'text-yellow-500'
-  },
-  'Settled': { 
-    message: 'Payment complete!', 
-    progress: 100,
-    icon: CheckCircle2,
-    color: 'text-green-500'
-  },
-  'Invalid': { 
-    message: 'Payment invalid. Please try again.', 
-    progress: 0,
-    icon: XCircle,
-    color: 'text-red-500'
-  },
-  'Expired': { 
-    message: 'Payment expired. Please try again.', 
-    progress: 0,
-    icon: AlertCircle,
-    color: 'text-orange-500'
-  }
-};
 
 export function PaymentDialog({
   isOpen,
   onClose,
   selectedPackage,
-  onBTCPurchase,
-  isProcessing,
-  isLoading,
-  currentInvoice,
-  onPaymentComplete
+  onPaymentSuccess,
+  onPaymentError
 }: PaymentDialogProps) {
-  const [lastClickTime, setLastClickTime] = useState(0);
-  const [paymentStatus, setPaymentStatus] = useState<InvoiceStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout>();
-  const DEBOUNCE_TIME = 2000;
-
-  // Handle payment status updates
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    if (currentInvoice?.id) {
-      setPaymentStatus(currentInvoice.status);
-      unsubscribe = btcPayService.subscribeToInvoiceStatus(currentInvoice.id, (status) => {
-        setPaymentStatus(status);
-        if (status === 'Settled' && onPaymentComplete) {
-          onPaymentComplete();
-        }
-      });
+  const { 
+    invoice, 
+    status, 
+    paymentMethods,
+    error,
+    isLoading,
+    create 
+  } = useInvoice({
+    onSettled: () => {
+      onPaymentSuccess?.();
+      setTimeout(onClose, 2000); // Close after showing success state
+    },
+    onExpired: () => {
+      onPaymentError?.(new Error('Payment expired'));
     }
+  });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [currentInvoice?.id, currentInvoice?.status, onPaymentComplete]);
-
-  // Handle expiration timer
-  useEffect(() => {
-    if (currentInvoice?.expiresAt) {
-      const updateTimer = () => {
-        const expirationTime = new Date(currentInvoice.expiresAt).getTime();
-        const now = Date.now();
-        const remaining = Math.max(0, expirationTime - now);
-        
-        setTimeRemaining(remaining);
-
-        if (remaining === 0) {
-          setPaymentStatus('Expired');
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-          }
-        }
-      };
-
-      updateTimer();
-      timerRef.current = setInterval(updateTimer, 1000);
-
-      return () => {
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-      };
+  React.useEffect(() => {
+    if (isOpen && selectedPackage && !invoice) {
+      create(selectedPackage).catch(onPaymentError);
     }
-  }, [currentInvoice?.expiresAt]);
+  }, [isOpen, selectedPackage, invoice, create, onPaymentError]);
 
-  const handlePurchaseClick = useCallback(async () => {
-    const now = Date.now();
-    if (now - lastClickTime < DEBOUNCE_TIME) {
-      return;
+  const getStatusDisplay = () => {
+    if (isLoading) return 'Generating payment details...';
+    if (error) return 'Error creating payment';
+    if (!invoice) return 'Initializing...';
+
+    switch (status) {
+      case 'New':
+        return 'Waiting for payment...';
+      case 'Processing':
+        return 'Processing payment...';
+      case 'Settled':
+        return 'Payment successful!';
+      case 'Expired':
+        return 'Payment expired';
+      case 'Invalid':
+        return 'Payment invalid';
+      default:
+        return 'Unknown status';
     }
-    
-    setLastClickTime(now);
-    setError(null);
-    setIsRetrying(true);
-
-    try {
-      const result = await onBTCPurchase();
-      if (!result.success && result.error) {
-        setError(result.error.message);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create payment');
-    } finally {
-      setIsRetrying(false);
-    }
-  }, [lastClickTime, onBTCPurchase]);
-
-  const formatTimeRemaining = (ms: number): string => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const statusInfo = paymentStatus ? STATUS_MESSAGES[paymentStatus] : null;
-  const StatusIcon = statusInfo?.icon;
+  const getStatusIcon = () => {
+    if (isLoading) return <Loader2 className="h-6 w-6 animate-spin" />;
+    if (status === 'Settled') return <CheckCircle2 className="h-6 w-6 text-green-500" />;
+    if (status === 'Expired' || status === 'Invalid') {
+      return <XCircle className="h-6 w-6 text-red-500" />;
+    }
+    return null;
+  };
+
+  const bitcoinPaymentMethod = paymentMethods?.find(
+    (m: BTCPayPaymentMethod) => m.cryptoCode === 'BTC'
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] p-0 gap-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>Complete Purchase</DialogTitle>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Complete Your Purchase</DialogTitle>
         </DialogHeader>
         
-        <div className="p-6 space-y-6">
-          <Card className="overflow-hidden">
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-400">Price:</span>
-                <span className="text-lg font-semibold">{selectedPackage?.btcPrice} BTC</span>
-              </div>
+        <div className="flex flex-col items-center space-y-4 py-4">
+          {getStatusIcon()}
+          
+          <p className="text-center text-sm text-muted-foreground">
+            {getStatusDisplay()}
+          </p>
+
+          {invoice && bitcoinPaymentMethod && (
+            <div className="flex flex-col items-center space-y-2">
+              <QRCodeSVG
+                value={bitcoinPaymentMethod.paymentLink}
+                size={200}
+                includeMargin
+                className="bg-white p-2 rounded-lg"
+              />
               
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  </motion.div>
-                )}
+              <p className="text-xs text-center text-muted-foreground">
+                Scan QR code or click below to pay
+              </p>
 
-                {currentInvoice ? (
-                  <motion.div
-                    className="space-y-6"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                  >
-                    <div className="relative">
-                      <div className="aspect-square bg-white rounded-lg flex items-center justify-center p-4">
-                        <QRCode
-                          value={currentInvoice.checkoutLink}
-                          size={256}
-                        />
-                      </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.open(bitcoinPaymentMethod.paymentLink, '_blank')}
+                disabled={status === 'Settled' || status === 'Expired'}
+              >
+                Open in Wallet
+              </Button>
 
-                      {timeRemaining !== null && timeRemaining > 0 && (
-                        <div className="absolute top-2 right-2 bg-black/80 rounded-full px-3 py-1 text-sm font-medium text-white flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {formatTimeRemaining(timeRemaining)}
-                        </div>
-                      )}
-                    </div>
-
-                    {statusInfo && (
-                      <motion.div 
-                        className="space-y-3"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                      >
-                        <Progress 
-                          value={statusInfo.progress} 
-                          className="w-full h-2"
-                        />
-                        <div className="flex items-center justify-center gap-2 text-sm">
-                          {StatusIcon && (
-                            <div className={cn("h-5 w-5", statusInfo.color)}>
-                              <StatusIcon />
-                            </div>
-                          )}
-                          <p className={cn("font-medium", statusInfo.color)}>
-                            {statusInfo.message}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    <div className="space-y-3">
-                      <Button
-                        onClick={() => window.open(currentInvoice.checkoutLink, '_blank')}
-                        className="w-full"
-                        disabled={paymentStatus === 'Settled'}
-                        aria-label="Open payment in wallet"
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Open in Wallet
-                      </Button>
-
-                      {(paymentStatus === 'Invalid' || paymentStatus === 'Expired') && (
-                        <Button
-                          onClick={handlePurchaseClick}
-                          variant="outline"
-                          className="w-full"
-                          disabled={isRetrying}
-                          aria-label="Try payment again"
-                        >
-                          {isRetrying ? (
-                            <>
-                              <Spinner className="mr-2" />
-                              Retrying...
-                            </>
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Try Again
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-center text-zinc-400">
-                      {paymentStatus === 'Settled' ? 
-                        "Thank you for your purchase!" :
-                        "Scan the QR code or click the button above to complete your purchase"}
-                    </p>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <Button
-                      onClick={handlePurchaseClick}
-                      disabled={isLoading || isProcessing || Date.now() - lastClickTime < DEBOUNCE_TIME}
-                      className="w-full h-12"
-                      aria-label="Create payment"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Spinner className="mr-2" />
-                          Creating Invoice...
-                        </>
-                      ) : isProcessing ? (
-                        <>
-                          <Spinner className="mr-2" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Pay with Bitcoin"
-                      )}
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="text-center space-y-1">
+                <p className="text-sm font-medium">Amount Due</p>
+                <p className="text-lg font-bold">
+                  {invoice.amount} {invoice.currency}
+                </p>
+              </div>
             </div>
-          </Card>
+          )}
+
+          {error && (
+            <div className="text-center text-red-500 text-sm">
+              {error.message}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            className={cn(
+              "px-4",
+              status === 'Settled' && "hidden"
+            )}
+          >
+            Cancel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

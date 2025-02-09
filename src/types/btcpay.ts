@@ -1,18 +1,13 @@
 export interface BTCPayMetadata {
-  packageId: string;
-  coins: number;
   userId?: string;
+  packageId?: string;
+  coins?: number;
   intentId?: string;
   orderId?: string;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
-export type InvoiceStatus = 
-  | 'New' 
-  | 'Processing' 
-  | 'Settled' 
-  | 'Expired' 
-  | 'Invalid';
+export type InvoiceStatus = 'New' | 'Processing' | 'Settled' | 'Invalid' | 'Expired';
 
 export type PaymentStatus = 
   | 'New'
@@ -42,51 +37,56 @@ export interface BTCPayCheckoutOptions {
 export interface BTCPayInvoiceRequest {
   price: number;
   currency: string;
-  metadata: {
-    userId?: string;
-    packageId?: string;
-    coins?: number;
-    orderId?: string;
-    [key: string]: unknown;
+  metadata?: BTCPayMetadata;
+  checkout?: {
+    speedPolicy?: 'HighSpeed' | 'MediumSpeed' | 'LowSpeed' | 'LowMediumSpeed';
+    paymentMethods?: string[];
+    expirationMinutes?: number;
+    monitoringMinutes?: number;
+    paymentTolerance?: number;
+    redirectURL?: string;
+    redirectAutomatically?: boolean;
+    defaultLanguage?: string;
   };
-  checkout?: BTCPayCheckoutOptions;
-  redirectURL?: string;
 }
 
 export interface BTCPayPaymentMethod {
   paymentMethod: string;
   cryptoCode: string;
   destination: string;
+  paymentLink: string;
   rate: number;
-  paymentLink?: string;
-  amount?: string;
-  due?: string;
-  totalPaid?: string;
-  networkFee?: string;
-  payments?: Array<{
+  paymentMethodPaid: string;
+  totalPaid: string;
+  due: string;
+  amount: string;
+  networkFee: string;
+  payments: Array<{
     id: string;
     receivedDate: string;
     value: string;
-    fee?: string;
-    status: PaymentStatus;
+    fee: string;
+    status: string;
     destination: string;
   }>;
 }
 
 export interface BTCPayInvoice {
   id: string;
-  status: InvoiceStatus;
-  checkoutLink: string;
+  storeId: string;
   amount: number;
   currency: string;
-  metadata?: Record<string, unknown>;
+  type: 'Standard' | 'TopUp';
+  checkoutLink: string;
+  status: InvoiceStatus;
+  additionalStatus: string;
+  monitoringExpiration: string;
+  expirationTime: string;
+  createdTime: string;
+  metadata?: BTCPayMetadata;
+  availableStatusesForManualMarking: string[];
+  archived: boolean;
   createdAt: string;
-  expiresAt: string;
-  monitoringExpiration?: string;
-  paymentMethods?: BTCPayPaymentMethod[];
-  additionalStatus?: string;
-  availableStatusesForManualMarking?: string[];
-  archived?: boolean;
 }
 
 export interface BTCPayWebhookPayload {
@@ -114,39 +114,43 @@ export interface BTCPayWebhookRequest {
   events: string[];
   enabled: boolean;
   automaticRedelivery: boolean;
-  secret: string;
+  secret?: string;
 }
 
 export interface BTCPayWebhookDelivery {
   id: string;
   timestamp: string;
+  httpCode: number;
+  errorMessage: string | null;
+  status: 'Failed' | 'Complete';
   webhookId: string;
-  success: boolean;
-  errorMessage?: string;
-  payload: BTCPayWebhookPayload;
-  status: number;
-  httpCode?: number;
-  attemptCount?: number;
-  nextRetry?: string;
+  deliveryId: string;
+  webhookEvent: {
+    deliveryId: string;
+    webhookId: string;
+    originalDeliveryId: string;
+    isRedelivery: boolean;
+    type: string;
+    timestamp: string;
+    storeId: string;
+    invoiceId: string;
+  };
 }
 
 export interface BTCPayRefundRequest {
   amount?: number;
-  paymentMethod?: string;
   description?: string;
-  paymentMethodCriteria?: string[];
+  paymentMethod?: string;
 }
 
 export interface BTCPayRefundResponse {
   id: string;
   invoiceId: string;
-  status: PaymentStatus;
+  paymentMethod: string;
+  status: 'New' | 'Processing' | 'Completed' | 'Failed';
   amount: number;
-  description?: string;
-  destination?: string;
-  paymentMethod?: string;
-  rate?: number;
-  transactionId?: string;
+  description: string;
+  createdAt: string;
 }
 
 export interface BTCPayError {
@@ -160,7 +164,6 @@ export interface BTCPayServiceInterface {
   getInvoice(invoiceId: string): Promise<BTCPayInvoice>;
   getWebhookDeliveries(): Promise<BTCPayWebhookDelivery[]>;
   createRefund(invoiceId: string, params?: BTCPayRefundRequest): Promise<BTCPayRefundResponse>;
-  subscribeToInvoiceStatus(invoiceId: string, callback: (status: InvoiceStatus) => void): () => void;
   archiveInvoice(invoiceId: string): Promise<void>;
   unarchiveInvoice(invoiceId: string): Promise<void>;
   markInvoiceStatus(invoiceId: string, status: 'Invalid' | 'Settled'): Promise<void>;
@@ -168,4 +171,8 @@ export interface BTCPayServiceInterface {
   getRefunds(invoiceId: string): Promise<BTCPayRefundResponse[]>;
   cancelInvoice(invoiceId: string): Promise<void>;
   updateInvoiceMetadata(invoiceId: string, metadata: Record<string, unknown>): Promise<void>;
+  subscribeToInvoiceStatus(
+    invoiceId: string,
+    callback: (status: InvoiceStatus) => void
+  ): () => void;
 } 

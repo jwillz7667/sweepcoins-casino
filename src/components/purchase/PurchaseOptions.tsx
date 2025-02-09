@@ -1,32 +1,17 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import { toast } from "sonner";
-import { useBTCPay } from "@/hooks/use-btcpay";
 import { useApi } from '@/hooks/use-api';
 import { packages } from './packages.data';
 import { PaymentDialog } from './PaymentDialog';
 import { PurchaseCard } from './PurchaseCard';
-import { usePurchaseStore } from '@/store';
-import { useAppStore } from '@/store';
 import { usePerformance } from '@/hooks/use-performance';
-import { useAsyncCallback } from '@/hooks/use-async';
 import { errorTracking } from '@/lib/error-tracking';
+import { Package } from '@/types/package';
 import { PurchaseIntent } from '@/types';
 
 export const PurchaseOptions = memo(() => {
-  const { createInvoice, checkInvoiceStatus, currentInvoice } = useBTCPay();
   const api = useApi();
-  
-  const {
-    selectedPackage,
-    isProcessing,
-    activeInvoiceId,
-    setSelectedPackage,
-    setIsProcessing,
-    setActiveInvoiceId,
-    resetPurchaseState
-  } = usePurchaseStore();
-
-  const { setError } = useAppStore();
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Initialize performance monitoring
@@ -37,228 +22,112 @@ export const PurchaseOptions = memo(() => {
     },
   });
 
-  // Handle BTC purchase with performance tracking and error handling
-  const { execute: executeBTCPurchase, isLoading: isBTCPurchaseLoading } = useAsyncCallback<{ success: boolean; error?: Error }>(
-    async () => {
-      if (!selectedPackage) {
-        return { success: false, error: new Error('No package selected') };
-      }
+  const handlePaymentSuccess = async () => {
+    const traceId = performance.startInteraction('payment_success', {
+      packageId: selectedPackage?.id || '',
+    });
 
-      const traceId = performance.startInteraction('btc_purchase', {
-        packageId: String(selectedPackage.id),
-        amount: String(selectedPackage.btcPrice),
+    try {
+      toast.success(`Successfully purchased ${selectedPackage?.coins.toLocaleString()} coins!`);
+      // Additional success handling (e.g., update user balance)
+      performance.recordInteraction('payment_success_handled');
+    } catch (error) {
+      console.error('Error handling payment success:', error);
+      errorTracking.captureError(error, {
+        context: {
+          component: 'PurchaseOptions',
+          action: 'handle_payment_success',
+          packageId: selectedPackage?.id || '',
+        }
       });
+    } finally {
+      setIsDialogOpen(false);
+      setSelectedPackage(null);
+      performance.endInteraction(traceId);
+    }
+  };
 
-      try {
-        setIsProcessing(true);
+  const handlePaymentError = (error: Error) => {
+    const traceId = performance.startInteraction('payment_error', {
+      packageId: selectedPackage?.id || '',
+      error: error.message,
+    });
 
-        // Create purchase intent first
-        const intent = await performance.measureOperation(
-          'create_purchase_intent',
-          () =>
-            api.post<PurchaseIntent>('/api/purchase/intent', {
-              packageId: selectedPackage.id,
-              amount: selectedPackage.btcPrice,
-              currency: 'BTC',
-            })
-        );
-
-        if (!intent || !intent.id) {
-          throw new Error('Failed to create purchase intent - invalid response');
-        }
-
-        // Create BTCPay invoice
-        const invoice = await performance.measureOperation(
-          'create_btc_invoice',
-          async () => {
-            const response = await createInvoice({
-              price: selectedPackage.btcPrice,
-              currency: 'BTC',
-              metadata: {
-                packageId: String(selectedPackage.id),
-                coins: selectedPackage.coins,
-                intentId: intent.id
-              },
-            });
-
-            if (!response || !response.id || !response.checkoutLink) {
-              throw new Error('Invalid invoice response from BTCPay');
-            }
-
-            return response;
-          }
-        );
-
-        setActiveInvoiceId(invoice.id);
-        performance.recordInteraction('btc_invoice_created');
-        return { success: true };
-      } catch (error) {
-        console.error('BTC purchase error:', error);
-        performance.recordInteraction('btc_purchase_error');
-        errorTracking.captureError(error, {
-          context: {
-            component: 'PurchaseOptions',
-            action: 'btc_purchase',
-            packageId: selectedPackage.id,
-            amount: selectedPackage.btcPrice,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          }
-        });
-        return { 
-          success: false, 
-          error: error instanceof Error ? error : new Error('Failed to create invoice') 
-        };
-      } finally {
-        setIsProcessing(false);
-        performance.endInteraction(traceId);
+    console.error('Payment error:', error);
+    errorTracking.captureError(error, {
+      context: {
+        component: 'PurchaseOptions',
+        action: 'handle_payment_error',
+        packageId: selectedPackage?.id || '',
       }
-    },
-    {
-      onError: (error) => {
-        setError(error);
-        toast.error(error.message || 'Failed to create invoice. Please try again.');
-        setIsDialogOpen(false);
-        resetPurchaseState();
-      },
-    }
-  );
+    });
 
-  // Effect for handling BTC payment polling with performance tracking
-  useEffect(() => {
-    if (!activeInvoiceId || !selectedPackage || !isDialogOpen) {
-      return;
-    }
+    toast.error(error.message || 'Payment failed. Please try again.');
+    setIsDialogOpen(false);
+    setSelectedPackage(null);
+    performance.endInteraction(traceId);
+  };
 
-    const MAX_POLLING_DURATION = 20 * 60 * 1000; // 20 minutes
-    const startTime = Date.now();
-    const pollInterval = setInterval(pollInvoiceStatus, 5000);
+  const handlePackageSelect = async (pkg: Package) => {
+    const traceId = performance.startInteraction('select_package', {
+      packageId: pkg.id,
+    });
 
-    async function pollInvoiceStatus() {
-      if (!activeInvoiceId || !selectedPackage) return;
+    try {
+      // Create purchase intent
+      const intent = await performance.measureOperation(
+        'create_purchase_intent',
+        () =>
+          api.post<PurchaseIntent>('/api/purchase/intent', {
+            packageId: pkg.id,
+            amount: pkg.btcPrice,
+            currency: 'BTC',
+          })
+      );
 
-      const traceId = performance.startInteraction('check_btc_invoice', {
-        invoiceId: activeInvoiceId,
+      if (!intent || !intent.id) {
+        throw new Error('Failed to create purchase intent');
+      }
+
+      setSelectedPackage(pkg);
+      setIsDialogOpen(true);
+      performance.recordInteraction('package_selected');
+    } catch (error) {
+      console.error('Error selecting package:', error);
+      errorTracking.captureError(error, {
+        context: {
+          component: 'PurchaseOptions',
+          action: 'select_package',
+          packageId: pkg.id,
+        }
       });
-
-      try {
-        // Check if we've exceeded the maximum polling duration
-        if (Date.now() - startTime > MAX_POLLING_DURATION) {
-          clearInterval(pollInterval);
-          toast.error('Payment session timed out. Please try again.');
-          setIsDialogOpen(false);
-          resetPurchaseState();
-          performance.recordInteraction('btc_payment_timeout');
-          return;
-        }
-
-        const updatedInvoice = await performance.measureOperation(
-          'check_invoice_status',
-          () => checkInvoiceStatus(activeInvoiceId)
-        );
-
-        switch (updatedInvoice?.status) {
-          case 'Settled':
-            clearInterval(pollInterval);
-            toast.success(`Successfully purchased ${selectedPackage.coins.toLocaleString()} coins!`);
-            setIsDialogOpen(false);
-            resetPurchaseState();
-            performance.recordInteraction('btc_payment_success');
-            break;
-          case 'Expired':
-            clearInterval(pollInterval);
-            toast.error('Payment expired. Please try again.');
-            setIsDialogOpen(false);
-            resetPurchaseState();
-            performance.recordInteraction('btc_payment_expired');
-            break;
-          case 'New':
-            if (Math.floor((Date.now() - startTime) / 1000) % 30 === 0) {
-              toast.info('Waiting for payment...', { id: 'btc-pending' });
-              performance.recordInteraction('btc_payment_pending');
-            }
-            break;
-          case 'Processing':
-            toast.info('Payment is being processed...', { id: 'btc-processing' });
-            performance.recordInteraction('btc_payment_processing');
-            break;
-          default:
-            if (updatedInvoice?.status) {
-              console.warn('Unknown invoice status:', updatedInvoice.status);
-              performance.recordInteraction('btc_payment_unknown_status', 0, {
-                status: updatedInvoice.status,
-              });
-            }
-        }
-      } catch (error) {
-        errorTracking.captureError(error, {
-          context: {
-            component: 'PurchaseOptions',
-            action: 'check_btc_invoice',
-            invoiceId: activeInvoiceId,
-          }
-        });
-      } finally {
-        performance.endInteraction(traceId);
-      }
+      toast.error('Failed to initialize purchase. Please try again.');
+    } finally {
+      performance.endInteraction(traceId);
     }
-
-    return () => {
-      clearInterval(pollInterval);
-      resetPurchaseState();
-    };
-  }, [activeInvoiceId, selectedPackage, isDialogOpen, checkInvoiceStatus, performance, resetPurchaseState]);
-
-  // Effect to reset state when dialog closes
-  useEffect(() => {
-    if (!isDialogOpen) {
-      resetPurchaseState();
-    }
-  }, [isDialogOpen, resetPurchaseState]);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Purchase Game Coins</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-yellow-400">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-            </svg>
-          </span>
-          <span className="text-lg font-semibold">Current Balance: {0} GC</span>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg) => (
           <PurchaseCard
             key={pkg.id}
             package={pkg}
-            onSelect={() => {
-              const traceId = performance.startInteraction('select_package', {
-                packageId: String(pkg.id),
-              });
-              setSelectedPackage(pkg);
-              setIsDialogOpen(true);
-              performance.endInteraction(traceId);
-            }}
+            onSelect={() => handlePackageSelect(pkg)}
           />
         ))}
       </div>
       
-      <PaymentDialog
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          resetPurchaseState();
-        }}
-        selectedPackage={selectedPackage}
-        onBTCPurchase={executeBTCPurchase}
-        isProcessing={isProcessing}
-        isLoading={isBTCPurchaseLoading}
-        currentInvoice={currentInvoice}
-      />
+      {selectedPackage && (
+        <PaymentDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          selectedPackage={selectedPackage}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentError={handlePaymentError}
+        />
+      )}
     </div>
   );
 });
