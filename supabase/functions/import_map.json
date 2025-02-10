@@ -1,6 +1,12 @@
 {
   "imports": {
-    "$std/": "https://deno.land/std@0.168.0/",
+    "deno/": "https://deno.land/std@0.168.0/",
+    "http/": "https://deno.land/std@0.168.0/http/",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.21.0"
+  },
+  "scopes": {
+    "https://deno.land/": {
+      "deno": "https://deno.land/std@0.168.0/types/deno.d.ts"
+    }
   }
 } 

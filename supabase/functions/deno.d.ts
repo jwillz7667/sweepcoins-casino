@@ -1,8 +1,9 @@
-/// <reference types="https://deno.land/x/types/index.d.ts" />
+/// <reference no-default-lib="true" />
+/// <reference lib="deno.ns" />
 
 declare namespace Deno {
-  export interface Env {
+  interface Env {
     get(key: string): string | undefined;
   }
-  export const env: Env;
+  const env: Env;
 } 
