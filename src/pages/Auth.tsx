@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -7,19 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Coins } from "lucide-react";
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      await signIn(email, password);
-    } else {
-      await signUp(email, username, password);
-    }
+    await signIn(email, password);
   };
 
   return (
@@ -29,13 +24,9 @@ const AuthPage = () => {
           <div className="flex items-center justify-center mb-6">
             <Coins className="h-12 w-12 text-yellow-400 animate-pulse" />
           </div>
-          <CardTitle className="text-2xl text-center">
-            {isLogin ? "Welcome Back!" : "Create an Account"}
-          </CardTitle>
+          <CardTitle className="text-2xl text-center">Welcome Back!</CardTitle>
           <CardDescription className="text-center">
-            {isLogin
-              ? "Enter your credentials to access your account"
-              : "Sign up to start playing and winning"}
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -52,20 +43,6 @@ const AuthPage = () => {
                 className="auth-input"
               />
             </div>
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Choose a username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="auth-input"
-                />
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -79,17 +56,9 @@ const AuthPage = () => {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter>
             <Button type="submit" className="w-full">
-              {isLogin ? "Sign In" : "Sign Up"}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
+              Sign In
             </Button>
           </CardFooter>
         </form>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, type ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -176,27 +177,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, username: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      toast.success('Registration successful! Please check your email to verify your account.');
-      navigate('/auth');
-    } catch (error) {
-      handleAuthError(error as AuthError);
-    }
-  };
-
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -215,8 +195,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider value={{ 
       user, 
       loading, 
-      signIn, 
-      signUp, 
+      signIn,
       signOut 
     }}>
       {loading ? <LoadingSpinner /> : children}
