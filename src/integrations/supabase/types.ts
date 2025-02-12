@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_activity_logs: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_analytics: {
+        Row: {
+          id: string
+          metric_name: string
+          metric_value: Json
+          recorded_at: string | null
+          recorded_by: string | null
+        }
+        Insert: {
+          id?: string
+          metric_name: string
+          metric_value: Json
+          recorded_at?: string | null
+          recorded_by?: string | null
+        }
+        Update: {
+          id?: string
+          metric_name?: string
+          metric_value?: Json
+          recorded_at?: string | null
+          recorded_by?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           content: string
@@ -530,13 +584,17 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_approved_at: string | null
+          admin_notes: string | null
           avatar_url: string | null
           created_at: string
           email: string | null
           id: string
           kyc_verified: boolean | null
+          last_admin_action: string | null
           referral_code: string | null
           referred_by: string | null
+          risk_level: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           sweepcoins: number | null
           total_wagered: number | null
@@ -545,13 +603,17 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          admin_approved_at?: string | null
+          admin_notes?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           id: string
           kyc_verified?: boolean | null
+          last_admin_action?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          risk_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           sweepcoins?: number | null
           total_wagered?: number | null
@@ -560,13 +622,17 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          admin_approved_at?: string | null
+          admin_notes?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
           kyc_verified?: boolean | null
+          last_admin_action?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          risk_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           sweepcoins?: number | null
           total_wagered?: number | null
@@ -996,6 +1062,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_add_sweepcoins: {
+        Args: {
+          target_user_id: string
+          amount: number
+          reason?: string
+        }
+        Returns: undefined
+      }
       create_admin_user: {
         Args: {
           admin_email: string
@@ -1023,6 +1097,14 @@ export type Database = {
             }
             Returns: string
           }
+      log_admin_action: {
+        Args: {
+          action_type: string
+          target_user_id: string
+          details?: Json
+        }
+        Returns: string
+      }
       process_payment: {
         Args: {
           transaction_id: string
