@@ -9,6 +9,88 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          published_at: string | null
+          status: string
+          title: string
+          type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          published_at?: string | null
+          status?: string
+          title: string
+          type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          published_at?: string | null
+          status?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string
+          entity_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bets: {
         Row: {
           amount: number
@@ -309,6 +391,57 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          expired_at: string | null
+          id: string
+          invalidated_at: string | null
+          invoice_id: string
+          metadata: Json | null
+          package_id: string
+          processing_started_at: string | null
+          settled_at: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          expired_at?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invoice_id: string
+          metadata?: Json | null
+          package_id: string
+          processing_started_at?: string | null
+          settled_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          expired_at?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invoice_id?: string
+          metadata?: Json | null
+          package_id?: string
+          processing_started_at?: string | null
+          settled_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jackpots: {
         Row: {
           created_at: string
@@ -451,6 +584,131 @@ export type Database = {
           },
         ]
       }
+      purchase_intents: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          expired_at: string | null
+          id: string
+          metadata: Json | null
+          package_id: string
+          status: Database["public"]["Enums"]["purchase_intent_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency: string
+          expired_at?: string | null
+          id?: string
+          metadata?: Json | null
+          package_id: string
+          status?: Database["public"]["Enums"]["purchase_intent_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          expired_at?: string | null
+          id?: string
+          metadata?: Json | null
+          package_id?: string
+          status?: Database["public"]["Enums"]["purchase_intent_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      refunds: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          invoice_id: string | null
+          processed_at: string | null
+          reason: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          processed_at?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          processed_at?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_settings: {
+        Row: {
+          default_user_coins: number | null
+          id: number
+          maintenance_mode: boolean | null
+          max_daily_withdrawals: number | null
+          max_deposit_amount: number | null
+          min_deposit_amount: number | null
+          privacy_url: string | null
+          registration_enabled: boolean | null
+          support_email: string | null
+          terms_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          default_user_coins?: number | null
+          id: number
+          maintenance_mode?: boolean | null
+          max_daily_withdrawals?: number | null
+          max_deposit_amount?: number | null
+          min_deposit_amount?: number | null
+          privacy_url?: string | null
+          registration_enabled?: boolean | null
+          support_email?: string | null
+          terms_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          default_user_coins?: number | null
+          id?: number
+          maintenance_mode?: boolean | null
+          max_daily_withdrawals?: number | null
+          max_deposit_amount?: number | null
+          min_deposit_amount?: number | null
+          privacy_url?: string | null
+          registration_enabled?: boolean | null
+          support_email?: string | null
+          terms_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -591,6 +849,39 @@ export type Database = {
           },
         ]
       }
+      users: {
+        Row: {
+          coins: number | null
+          created_at: string | null
+          email: string
+          id: string
+          is_admin: boolean | null
+          is_banned: boolean | null
+          last_login: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          coins?: number | null
+          created_at?: string | null
+          email: string
+          id: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
+          last_login?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          coins?: number | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
+          last_login?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       vip_levels: {
         Row: {
           cashback_rate: number
@@ -618,11 +909,93 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          invoice_id: string | null
+          payload: Json
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          invoice_id?: string | null
+          payload: Json
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          invoice_id?: string | null
+          payload?: Json
+        }
+        Relationships: []
+      }
+      wins: {
+        Row: {
+          amount: number
+          created_at: string | null
+          game_id: string | null
+          id: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+          verification_note: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+          verification_note?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+          verification_note?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wins_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      add_user_coins: {
+        Args: {
+          user_id: string
+          coins_amount: number
+        }
+        Returns: undefined
+      }
       create_admin_user: {
         Args: {
           admin_email: string
@@ -650,11 +1023,26 @@ export type Database = {
             }
             Returns: string
           }
+      process_payment: {
+        Args: {
+          transaction_id: string
+          user_id: string
+          coins_amount: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       bet_status: "pending" | "completed" | "cancelled"
       game_status: "active" | "maintenance" | "deprecated"
       game_type: "slots" | "table" | "live" | "instant"
+      invoice_status: "new" | "processing" | "settled" | "expired" | "invalid"
+      purchase_intent_status:
+        | "created"
+        | "processing"
+        | "completed"
+        | "expired"
+        | "failed"
       transaction_type:
         | "deposit"
         | "withdrawal"
