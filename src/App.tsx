@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import AuthProvider from "@/contexts/AuthContext";
 import Web3Provider from "@/contexts/Web3Context";
 import SecurityProvider from "@/contexts/SecurityContext";
-import { BTCPayProvider } from "@/contexts/btcpay/context";
+import { BTCPayProvider } from "@/contexts/btcpay/provider";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Suspense, lazy } from "react";

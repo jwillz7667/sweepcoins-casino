@@ -13,6 +13,7 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetAuth: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

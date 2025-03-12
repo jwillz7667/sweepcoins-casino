@@ -1,16 +1,14 @@
-
 import { useContext } from 'react';
-import { AuthContext } from '@/contexts/auth-context';
-import { User } from '@supabase/supabase-js';
+import { AuthContext, type AuthContextType } from '@/contexts/auth-context';
 
-export interface AuthContextType {
-  user: User | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  isLoading: boolean;
-  error: Error | null;
-}
+// Re-export the AuthContextType for convenience
+export type { AuthContextType };
 
+/**
+ * Hook for accessing authentication context throughout the application
+ * @returns {AuthContextType} The authentication context
+ * @throws {Error} If used outside of an AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
